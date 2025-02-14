@@ -97,31 +97,58 @@ impl StatusRegister {
 }
 
 struct CPU {
-    a: u8,             // Accumulator
-    x: u8,             // "X" Register
-    y: u8,             // "Y" Register
-    pc: u16,           // Program Counter
-    s: u8,             // Stack Pointer
-    p: StatusRegister, // Processor Status Register
+    accumulator: u8,                  // Accumulator
+    x_register: u8,                   // "X" Register
+    y_register: u8,                   // "Y" Register
+    program_counter: u16,             // Program Counter
+    stack_pointer: u8,                // Stack Pointer
+    processor_status: StatusRegister, // Processor Status Register
 }
 
 impl CPU {
     fn new() -> Self {
         CPU {
-            a: 0, 
-            x: 0,
-            y: 0, 
-            pc: 0x8000, // NES program entry point
-            s: 0xFD,
-            p: StatusRegister::new(),
+            accumulator: 0, 
+            x_register: 0,
+            y_register: 0, 
+            program_counter: 0x8000, // NES program entry point
+            stack_pointer: 0xFD,
+            processor_status: StatusRegister::new(),
         }
+    }
+
+    /**
+     * Executes the given op code executor.
+     */
+    #[inline(always)]
+    pub fn execute_instruction<T: Instruction>(&mut self, executor: OpCodeExecutor<T>) {
+        executor.execute(self);
     }
 }
 
+pub trait Instruction {
+    fn execute(&self, cpu: &mut CPU, opcode: &OpCode);
+}
+
 struct OpCode {
-    instruction: InstructionMnemonic, 
+    mnemonic: InstructionMnemonic, 
     mode: AddressingMode,
-    size: u8
+    size: u8,
+}
+
+pub struct OpCodeExecutor<T: Instruction> {
+    opcode: OpCode,
+    executor: T,
+}
+
+impl<T: Instruction> OpCodeExecutor<T> {
+    pub fn new(opcode: OpCode, executor: T) -> Self {
+        Self {opcode, executor }
+    }
+
+    pub fn execute(&self, cpu: &mut CPU) {
+        self.executor.execute(cpu, &self.opcode);
+    }
 }
 
 enum AddressingMode {
@@ -276,8 +303,6 @@ enum InstructionMnemonic {
     
     // endregion: ProcessorStatusInstructions
 }
-
-
 
 fn main() {
     println!("Hello, world!");

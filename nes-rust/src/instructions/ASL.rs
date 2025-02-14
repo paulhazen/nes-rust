@@ -1,0 +1,12 @@
+﻿use crate::cpu::CPU;
+use crate::instruction::Instruction;
+use crate::opcode::OpCode;
+
+pub struct ASL;
+
+impl Instruction for ASL {
+    fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
+        // TODO: Implement execution logic for ASL
+        println!("Executing ASL instruction");
+    }
+}
