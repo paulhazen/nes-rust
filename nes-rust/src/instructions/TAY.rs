@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct TAY;
 
+#[inline(always)]
 impl Instruction for TAY {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for TAY

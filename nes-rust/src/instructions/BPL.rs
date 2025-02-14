@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct BPL;
 
+#[inline(always)]
 impl Instruction for BPL {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for BPL

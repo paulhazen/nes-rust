@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct CLV;
 
+#[inline(always)]
 impl Instruction for CLV {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for CLV

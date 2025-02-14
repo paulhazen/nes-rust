@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct RTI;
 
+#[inline(always)]
 impl Instruction for RTI {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for RTI

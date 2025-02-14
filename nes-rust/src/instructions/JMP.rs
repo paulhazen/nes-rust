@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct JMP;
 
+#[inline(always)]
 impl Instruction for JMP {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for JMP

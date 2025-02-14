@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct INC;
 
+#[inline(always)]
 impl Instruction for INC {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for INC

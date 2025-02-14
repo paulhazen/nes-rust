@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct TAX;
 
+#[inline(always)]
 impl Instruction for TAX {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for TAX

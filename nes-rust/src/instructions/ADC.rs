@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct ADC;
 
+#[inline(always)]
 impl Instruction for ADC {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for ADC

@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct CLD;
 
+#[inline(always)]
 impl Instruction for CLD {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for CLD

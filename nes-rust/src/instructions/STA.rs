@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct STA;
 
+#[inline(always)]
 impl Instruction for STA {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for STA

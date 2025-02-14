@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct STX;
 
+#[inline(always)]
 impl Instruction for STX {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for STX

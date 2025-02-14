@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct CPX;
 
+#[inline(always)]
 impl Instruction for CPX {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for CPX

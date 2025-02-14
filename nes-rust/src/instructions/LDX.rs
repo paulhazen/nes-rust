@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct LDX;
 
+#[inline(always)]
 impl Instruction for LDX {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for LDX

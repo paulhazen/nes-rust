@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct ROR;
 
+#[inline(always)]
 impl Instruction for ROR {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for ROR

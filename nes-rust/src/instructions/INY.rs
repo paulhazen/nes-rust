@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct INY;
 
+#[inline(always)]
 impl Instruction for INY {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for INY

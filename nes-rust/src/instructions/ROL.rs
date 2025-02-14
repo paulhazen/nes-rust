@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct ROL;
 
+#[inline(always)]
 impl Instruction for ROL {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for ROL

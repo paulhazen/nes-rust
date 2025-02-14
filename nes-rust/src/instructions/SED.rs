@@ -4,6 +4,7 @@ use crate::opcode::OpCode;
 
 pub struct SED;
 
+#[inline(always)]
 impl Instruction for SED {
     fn execute(&self, cpu: &mut CPU, opcode: &OpCode) {
         // TODO: Implement execution logic for SED
