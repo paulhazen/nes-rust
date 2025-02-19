@@ -1,6 +1,7 @@
 mod constants;
 pub mod cpu;
 pub mod memory;
+pub mod macros;
 
 pub use memory::MemoryBus;
 pub use cpu::CPU;

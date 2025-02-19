@@ -4,9 +4,17 @@ use crate::cpu::instruction_mnemonic::InstructionMnemonic;
 use crate::cpu::addressing_mode::AddressingMode;
 
 pub struct OpCode {
-    mnemonic: InstructionMnemonic, 
-    mode: AddressingMode,
-    size: u8,
+    // The Three letter mnemonic for the particular opcode.
+    pub mnemonic: InstructionMnemonic, 
+
+    // The addressing mode for this opcode.
+    pub mode: AddressingMode,
+
+    // The size of the opcode.
+    pub size: u8,
+
+    // The number of clock cycles the opcode takes to execute.
+    pub cycles: u8,
 }
 
 pub struct OpCodeExecutor<T: Instruction> {

@@ -52,6 +52,12 @@ impl<'a> CPU<'a> {
         self.processor_status.reset()
     }
 
+    pub fn fetch_opcode(&mut self) -> u8 {
+        let opcode = self.memory_bus.read(self.program_counter);
+        self.program_counter = self.program_counter.wrapping_add(1);
+        opcode
+    }
+
     pub fn read_memory(&self, address:u16) -> u8 {
         self.memory_bus.read(address)
     }
