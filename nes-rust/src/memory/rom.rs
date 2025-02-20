@@ -1,10 +1,10 @@
 pub struct ROM {
-    pub data: Vec<u8>,
+    pub data: Box<[u8]>,
     mask: u16,
 }
 
 impl ROM {
-    pub fn new(prg_rom: Vec<u8>) -> Self {
+    pub fn new(prg_rom: Box<[u8]>) -> Self {
         let size = prg_rom.len();
         let mask = match size {
             0x4000 => 0x3FFF, // 16KB ROM (mirrored)

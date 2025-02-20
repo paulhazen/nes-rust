@@ -1,9 +1,10 @@
+#[derive(Debug)]
 pub enum InstructionMnemonic {
 
     ADC, AND, ASL, BCC, BCS, BEQ, BIT, BMI, BNE, BPL, BRK, BVC, BVS, CMP, CPX, 
     CPY, DEC, DEX, DEY, EOR, INC, INX, INY, JMP, JSR, LDA, LDX, LDY, LSR, NOP, 
-    ORA, PHA, PHP, PLA, ROL, ROR, RTI, RTS, SBC, STA, STX, STY, TAX, TAY, TSX, 
-    TXA, TXS, TYA,
+    ORA, PHA, PHP, PLA, PLP, ROL, ROR, RTI, RTS, SBC, STA, STX, STY, TAX, TAY, 
+    TSX, TXA, TXS, TYA,
 
     // region: ProcessorStatusInstructions
     
