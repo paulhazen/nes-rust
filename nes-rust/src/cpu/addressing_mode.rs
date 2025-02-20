@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum AddressingMode {
 
     /*
@@ -87,7 +88,7 @@ pub enum AddressingMode {
               page boundary (e.g. $12FF), the second byte is read from ($1200 
               instead of $1300).
      */
-    IndirectAddressing,
+    Indirect,
 
     /*
         Operand is an address in the zero-page, which is indexec by X and 

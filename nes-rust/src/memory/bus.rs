@@ -1,6 +1,7 @@
 use super::ram::RAM;
 use super::rom::ROM;
 use crate::constants::TWO_KB;
+use crate::cartridge::{self, Cartridge};
 
 pub struct MemoryBus {
     pub ram: RAM,
@@ -12,10 +13,10 @@ impl MemoryBus {
     pub const RESET_VECTOR_HIGH_ADDR: u16 = 0xFFFD;
     pub const RESET_VECTOR_DEFAULT: u16 = 0x8000;
 
-    pub fn new(prg_rom: Vec<u8>) -> Self {
+    pub fn load_cartridge(cartridge: Cartridge) -> Self {
         Self {
-            ram: RAM::new(TWO_KB),  // 2KB RAM
-            rom: ROM::new(prg_rom), // Loads the ROM
+            ram: RAM::new(TWO_KB),
+            rom: ROM::new(cartridge.prg_rom),
         }
     }
     
