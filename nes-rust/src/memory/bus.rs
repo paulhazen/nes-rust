@@ -1,7 +1,7 @@
 use super::ram::RAM;
 use super::rom::ROM;
 use crate::constants::TWO_KB;
-use crate::cartridge::{self, Cartridge};
+use crate::cartridge::{Cartridge};
 
 pub struct MemoryBus {
     pub ram: RAM,
