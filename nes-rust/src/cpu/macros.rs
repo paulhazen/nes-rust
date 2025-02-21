@@ -26,33 +26,18 @@ macro_rules! define_instruction {
             fn execute(&self, cpu: &mut CPU, opcode: &OpCode, memory: &mut crate::memory::MemoryBus) {
                 let value = match opcode.mode {
                     AddressingMode::Immediate => cpu.fetch_immediate(memory),
-                    //AddressingMode::ZeroPage  => cpu.fetch_zero_page(memory),
-                    //AddressingMode::ZeroPageX => cpu.fetch_zero_page_x(memory),
-                    //AddressingMode::Absolute  => cpu.fetch_absolute(memory),
-                    //AddressingMode::AbsoluteX => cpu.fetch_absolute_x(memory),
-                    //AddressingMode::AbsoluteY => cpu.fetch_absolute_y(memory),
+                    AddressingMode::ZeroPage  => cpu.fetch_zero_page(memory),
+                    AddressingMode::ZeroPageX => cpu.fetch_zero_page_x(memory),
+                    AddressingMode::Absolute  => cpu.fetch_absolute(memory),
+                    AddressingMode::AbsoluteX => cpu.fetch_absolute_x(memory),
+                    AddressingMode::AbsoluteY => cpu.fetch_absolute_y(memory),
                     AddressingMode::IndirectX => cpu.fetch_indirect_x(memory),
-                    //AddressingMode::IndirectY => cpu.fetch_indirect_y(memory),
+                    AddressingMode::IndirectY => cpu.fetch_indirect_y(memory),
                     _ => panic!(concat!(stringify!($name), " does not support addressing mode: {:?}"), opcode.mode),
                 };
 
                 $execute_fn(cpu, value);
             }
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! define_fetch {
-    ($name:ident, $addr_func:ident, $cpu:ident, $body:block) => {
-        // Function that computes the effective address
-        fn $addr_func($cpu: &mut CPU, memory: &MemoryBus) -> u16 {
-            $body
-        }
-
-        // Function that fetches the byte using the computed address
-        pub fn $name($cpu: &mut CPU, $memory: &MemoryBus) -> u8 {
-            CPU::fetch_fn($cpu, |$cpu, $memory| CPU::$addr_func($cpu, $memory), $memory)
         }
     };
 }

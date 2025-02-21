@@ -3,7 +3,6 @@ use crate::cpu::instruction::Instruction;
 use crate::cpu::opcode::OpCodeExecutor;
 use crate::cpu::opcode::OpCode;
 use crate::opcode_entry;
-use crate::define_fetch;
 use crate::memory::MemoryBus;
 use std::collections::HashMap;
 use once_cell::sync::Lazy;
@@ -599,12 +598,10 @@ impl CPU {
         println!("Looking up opcode {0}", opcode);
         if let Some(instruction) = OPCODE_TABLE.get(&opcode) {
             println!("Found opcode for instruction");
-
+            (instruction.factory)();
         } else {
             println!("Could not find instruction for opcode.");
         }
-
-
     }
 
     pub fn show_opcode_table(&self) {
