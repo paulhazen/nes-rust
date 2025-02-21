@@ -657,6 +657,10 @@ impl CPU {
 
     // startregion: Fetch functions
 
+    pub fn fetch_relative(&mut self, memory: &mut MemoryBus) -> u8 {
+        return self.fetch_byte(memory);
+    }
+
     pub fn fetch_immediate(&mut self, memory: &MemoryBus) -> u8 {
         self.fetch_byte(memory)
     }

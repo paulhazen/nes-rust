@@ -71,19 +71,25 @@ impl Cartridge {
     /// 
     /// * `u8` The byte at the given address.
     pub fn read_prg_rom(&self, address: u16) -> u8 {
+        if address < 0x8000 {
+            return 0xFF; // Outside valid PRG-ROM range
+        }
+    
         let prg_rom_size = self.prg_rom.len();
-
-        // PNG-ROM is mapped starting from 0x8000
         let prg_rom_offset = (address - 0x8000) as usize;
-
+    
         if prg_rom_size == 0x4000 {
-            // 16KB ROM - Mirror it to 0xC000-0xFFF
-            return self.prg_rom[prg_rom_offset % 0x4000];
-        } else {
+            // 16KB ROM - Mirror it to $C000-$FFFF
+            self.prg_rom[prg_rom_offset % 0x4000]
+        } else if prg_rom_size == 0x8000 {
             // 32KB ROM - Directly map it
-            return self.prg_rom[prg_rom_offset];
+            self.prg_rom[prg_rom_offset]
+        } else {
+            0xFF // Invalid read
         }
     }
+    
+    
 
     /// Reads and validates the NES file header.
     ///
