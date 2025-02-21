@@ -2,7 +2,6 @@ use nes_rust::cpu::CPU;
 use nes_rust::memory::MemoryBus;
 use nes_rust::cpu::status_register::StatusRegister;
 use nes_rust::cpu;
-
 #[test]
 fn test_view_opcode_table() {
 
