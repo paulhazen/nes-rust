@@ -1,6 +1,4 @@
 use crate::cpu::CPU;
-use crate::cpu::instruction::Instruction;
-use crate::cpu::opcode::OpCode;
 use crate::memory::MemoryBus;
 use crate::define_instruction;
 
