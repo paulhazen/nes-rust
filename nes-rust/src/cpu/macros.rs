@@ -25,7 +25,8 @@ macro_rules! define_instruction {
         impl crate::cpu::instruction::Instruction for $name {
             #[inline(always)]
             fn execute(&self, cpu: &mut CPU, opcode: &crate::cpu::opcode::OpCode, memory: &mut crate::memory::MemoryBus) {
-                let value = match opcode.mode {
+                let value =  match opcode.mode {
+                    crate::cpu::AddressingMode::Relative => cpu.fetch_relative(memory),
                     crate::cpu::AddressingMode::Immediate => cpu.fetch_immediate(memory),
                     crate::cpu::AddressingMode::ZeroPage  => cpu.fetch_zero_page(memory),
                     crate::cpu::AddressingMode::ZeroPageX => cpu.fetch_zero_page_x(memory),
@@ -33,11 +34,13 @@ macro_rules! define_instruction {
                     crate::cpu::AddressingMode::AbsoluteX => cpu.fetch_absolute_x(memory),
                     crate::cpu::AddressingMode::AbsoluteY => cpu.fetch_absolute_y(memory),
                     crate::cpu::AddressingMode::IndirectX => cpu.fetch_indirect_x(memory),
-                    crate::cpu::AddressingMode::IndirectY => cpu.fetch_indirect_y(memory),
-                    _ => panic!(concat!(stringify!($name), " does not support addressing mode: {:?}"), opcode.mode),
+                    crate::cpu::AddressingMode::IndirectY => cpu.fetch_indirect_y(memory) ,
+                    crate::cpu::AddressingMode::Implied   => 0x00,
+                    _ => panic!(concat!(stringify!($name), " does not support addressing mode: \"{:?}\""), opcode.mode),
                 };
+                
 
-                $execute_fn(cpu, memory, value.into());
+                $execute_fn(cpu, memory, value.try_into().unwrap());
             }
         }
     };

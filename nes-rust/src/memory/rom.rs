@@ -1,27 +1,28 @@
+use crate::memory::memory_view::MemoryView;
+use crate::memory::MemoryBus;
+
 pub struct ROM {
-    pub data: Box<[u8]>,
-    mask: u16,
+    start: usize,
+    end: usize,
 }
 
 impl ROM {
-    pub fn new(prg_rom: Box<[u8]>) -> Self {
-        let size = prg_rom.len();
-        let mask = match size {
-            0x4000 => 0x3FFF, // 16KB ROM (mirrored)
-            0x8000 => 0x7FFF, // 32KB ROM
-            _ => 0xFFFF,      // Larger ROMs may use bank switching
-        };
-
-        Self { data: prg_rom, mask }
+    pub fn new(start: usize, end: usize) -> Self {
+        Self { start, end }
     }
+}
 
-    pub fn write(&mut self, address:u16, value: u8) {
-        let mapped_addr = (address & self.mask) as usize;
-        self.data[mapped_addr] = value;
+impl MemoryView for ROM {
+    fn write(&mut self, _memory: &mut [u8], _address:u16, _value: u8) {
+        // TODO: Probably panic here - ROM should never be written to.
     }
     
-    pub fn read(&self, address: u16) -> u8 {
-        let mapped_addr = (address & self.mask) as usize;
-        self.data.get(mapped_addr).copied().unwrap_or(0xFF)
+    fn read(&self, memory: &[u8], address: u16) -> u8 {
+        let index = (address as usize).saturating_sub(self.start);
+        if index < (self.end - self.start) {
+            memory[self.start + index]
+        } else {
+            MemoryBus::UNMAPPED
+        }
     }
 }
