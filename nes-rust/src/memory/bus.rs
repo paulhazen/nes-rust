@@ -20,6 +20,11 @@ impl MemoryBus {
         }
     }
     
+    pub fn write(&mut self, address: u16, value: u8) {
+        
+    }
+
+    #[inline(always)]
     pub fn read(&self, address: u16) -> u8 {
         if Self::is_ram(address) {
             return self.ram.read(address)
