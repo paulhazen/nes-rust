@@ -1,7 +1,5 @@
 use nes_rust::system::NES;
 mod common;
-use std::time::Duration;
-use std::thread;
 use std::sync::mpsc;
 
 fn run_system_test()

@@ -6,6 +6,7 @@ use crate::memory::MemoryBus;
 
 pub type InstructionFactory = fn() -> Box<dyn Instruction + 'static>;
 
+#[derive(Clone)]
 pub struct OpCode {
     // The Three letter mnemonic for the particular opcode.
     pub mnemonic: InstructionMnemonic, 
