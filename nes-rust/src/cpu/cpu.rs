@@ -58,11 +58,11 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         contents by 2 (ignoring 2's complement considerations), setting
         the carry if the result will not fit in 8 bits.
     */
-    opcode_entry!(map,     0x0A,      ASL,      1,      2,       Accumulator ); 
-    opcode_entry!(map,     0x06,      ASL,      2,      5,       ZeroPage    ); 
-    opcode_entry!(map,     0x16,      ASL,      2,      6,       ZeroPageX   ); 
-    opcode_entry!(map,     0x0E,      ASL,      3,      6,       Absolute    ); 
-    opcode_entry!(map,     0x1E,      ASL,      3,      7,       AbsoluteX   );
+    //opcode_entry!(map,     0x0A,      ASL,      1,      2,       Accumulator ); 
+    //opcode_entry!(map,     0x06,      ASL,      2,      5,       ZeroPage    ); 
+    //opcode_entry!(map,     0x16,      ASL,      2,      6,       ZeroPageX   ); 
+    //opcode_entry!(map,     0x0E,      ASL,      3,      6,       Absolute    ); 
+    //opcode_entry!(map,     0x1E,      ASL,      3,      7,       AbsoluteX   );
 
     /*
         BCC - Branch if Carry Clear
@@ -70,7 +70,7 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         If the carry flag is clear then add the relative displacement to the 
         program counter to cause a branch to a new location.
     */
-    opcode_entry!(map,     0x90,      BCC,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    //opcode_entry!(map,     0x90,      BCC,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     /*
         BCS - Branch if Carry Set
@@ -78,7 +78,7 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         If the carry flag is set then add the relative displacement to the 
         program counter to cause a branch to a new location.
     */
-    opcode_entry!(map,     0xB0,      BCS,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    //opcode_entry!(map,     0xB0,      BCS,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     /*
         BEQ - Branch if Equal
@@ -106,7 +106,7 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         If the negative flag is set then add the relative displacement to the 
         program counter to cause a branch to a new location.
     */
-    opcode_entry!(map,     0x30,      BMI,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    //opcode_entry!(map,     0x30,      BMI,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     /*
         BNE - Branch if Not Equal
@@ -114,7 +114,7 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         If the zero flag is clear then add the relative displacement to the 
         program counter to cause a branch to a new location.
     */
-    opcode_entry!(map,     0xD0,      BNE,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    //opcode_entry!(map,     0xD0,      BNE,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     /*
         BPL - Branch if Positive
@@ -132,7 +132,7 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         IRQ interrupt vector at $FFFE/F is loaded into the PC and the break 
         flag in the status set to one.
     */
-    opcode_entry!(map,     0x00,      BRK,      1,      7,       Implied     );
+    //opcode_entry!(map,     0x00,      BRK,      1,      7,       Implied     );
 
     /*
         BVC - Branch if Overflow Clear
@@ -140,7 +140,7 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         If the overflow flag is clear then add the relative displacement to the
          program counter to cause a branch to a new location.
     */
-    opcode_entry!(map,     0x50,      BVC,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    //opcode_entry!(map,     0x50,      BVC,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     /*
         BVS - Branch if Overflow Set
@@ -148,7 +148,7 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         If the overflow flag is set then add the relative displacement to the
         program counter to cause a branch to a new location.
     */
-    opcode_entry!(map,     0x70,      BVS,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    //opcode_entry!(map,     0x70,      BVS,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     /*
         CLC - Clear Carry Flag
@@ -211,9 +211,9 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         This instruction compares the contents of the X register with another 
         memory held value and sets the zero and carry flags as appropriate.
     */
-    opcode_entry!(map,     0xE0,      CPX,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0xE4,      CPX,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0xEC,      CPX,      3,      4,       Absolute    ); 
+    //opcode_entry!(map,     0xE0,      CPX,      2,      2,       Immediate   ); 
+    //opcode_entry!(map,     0xE4,      CPX,      2,      3,       ZeroPage    ); 
+    //opcode_entry!(map,     0xEC,      CPX,      3,      4,       Absolute    ); 
 
     /*
         CPY - Compare Y Register
@@ -223,9 +223,9 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         This instruction compares the contents of the Y register with another 
         memory held value and sets the zero and carry flags as appropriate.
     */
-    opcode_entry!(map,     0xC0,      CPY,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0xC4,      CPY,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0xCC,      CPY,      3,      4,       Absolute    ); 
+    //opcode_entry!(map,     0xC0,      CPY,      2,      2,       Immediate   ); 
+    //opcode_entry!(map,     0xC4,      CPY,      2,      3,       ZeroPage    ); 
+    //opcode_entry!(map,     0xCC,      CPY,      3,      4,       Absolute    ); 
 
     /*
         DEC - Decrement Memory
@@ -235,10 +235,10 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Subtracts one from the value held at a specified memory location 
         setting the zero and negative flags as appropriate.
     */
-    opcode_entry!(map,     0xC6,      DEC,      2,      5,       ZeroPage    ); 
-    opcode_entry!(map,     0xD6,      DEC,      2,      6,       ZeroPageX   ); 
-    opcode_entry!(map,     0xCE,      DEC,      3,      6,       Absolute    ); 
-    opcode_entry!(map,     0xDE,      DEC,      3,      7,       AbsoluteX   ); 
+    //opcode_entry!(map,     0xC6,      DEC,      2,      5,       ZeroPage    ); 
+    //opcode_entry!(map,     0xD6,      DEC,      2,      6,       ZeroPageX   ); 
+    //opcode_entry!(map,     0xCE,      DEC,      3,      6,       Absolute    ); 
+    //opcode_entry!(map,     0xDE,      DEC,      3,      7,       AbsoluteX   ); 
 
     /*
         DEX - Decrement X Registe
@@ -285,10 +285,10 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Adds one to the value held at a specified memory location setting the 
         zero and negative flags as appropriate.
     */
-    opcode_entry!(map,     0xE6,      INC,      2,      5,       ZeroPage    ); 
-    opcode_entry!(map,     0xF6,      INC,      2,      6,       ZeroPageX   ); 
-    opcode_entry!(map,     0xEE,      INC,      3,      6,       Absolute    ); 
-    opcode_entry!(map,     0xFE,      INC,      3,      7,       AbsoluteX   );
+    //opcode_entry!(map,     0xE6,      INC,      2,      5,       ZeroPage    ); 
+    //opcode_entry!(map,     0xF6,      INC,      2,      6,       ZeroPageX   ); 
+    //opcode_entry!(map,     0xEE,      INC,      3,      6,       Absolute    ); 
+    //opcode_entry!(map,     0xFE,      INC,      3,      7,       AbsoluteX   );
 
     /*
         INX - Increment X Registe
@@ -315,8 +315,8 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
 
         Sets the program counter to the address specified by the operand.
     */
-    opcode_entry!(map,     0x4C,      JMP,      3,      3,       Absolute    ); 
-    opcode_entry!(map,     0x6C,      JMP,      3,      5,       Indirect    ); 
+    //opcode_entry!(map,     0x4C,      JMP,      3,      3,       Absolute    ); 
+    //opcode_entry!(map,     0x6C,      JMP,      3,      5,       Indirect    ); 
 
     /*
         JSR - Jump to Subroutine
@@ -380,11 +380,11 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Each of the bits in A or M is shift one place to the right. The bit 
         that was in bit 0 is shifted into the carry flag. Bit 7 is set to zero.
     */
-    opcode_entry!(map,     0x4A,      LSR,      1,      2,       Accumulator ); 
-    opcode_entry!(map,     0x46,      LSR,      2,      5,       ZeroPage    ); 
-    opcode_entry!(map,     0x56,      LSR,      2,      6,       ZeroPageX   ); 
-    opcode_entry!(map,     0x4E,      LSR,      3,      6,       Absolute    ); 
-    opcode_entry!(map,     0x5E,      LSR,      3,      7,       AbsoluteX   );
+    //opcode_entry!(map,     0x4A,      LSR,      1,      2,       Accumulator ); 
+    //opcode_entry!(map,     0x46,      LSR,      2,      5,       ZeroPage    ); 
+    //opcode_entry!(map,     0x56,      LSR,      2,      6,       ZeroPageX   ); 
+    //opcode_entry!(map,     0x4E,      LSR,      3,      6,       Absolute    ); 
+    //opcode_entry!(map,     0x5E,      LSR,      3,      7,       AbsoluteX   );
 
     /*
         NOP - No Operation
@@ -402,28 +402,28 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         An inclusive OR is performed, bit by bit, on the accumulator contents
         using the contents of a byte of memory.
     */
-    opcode_entry!(map,     0x09,      ORA,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0x05,      ORA,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x15,      ORA,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0x0D,      ORA,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0x1D,      ORA,      3,      4,       AbsoluteX   ); // +1 if page crossed
-    opcode_entry!(map,     0x19,      ORA,      3,      4,       AbsoluteY   ); // +1 if page crossed
-    opcode_entry!(map,     0x01,      ORA,      2,      6,       IndirectX   ); 
-    opcode_entry!(map,     0x11,      ORA,      2,      5,       IndirectY   ); // +1 if page crosse
+    //opcode_entry!(map,     0x09,      ORA,      2,      2,       Immediate   ); 
+    //opcode_entry!(map,     0x05,      ORA,      2,      3,       ZeroPage    ); 
+    //opcode_entry!(map,     0x15,      ORA,      2,      4,       ZeroPageX   ); 
+    //opcode_entry!(map,     0x0D,      ORA,      3,      4,       Absolute    ); 
+    //opcode_entry!(map,     0x1D,      ORA,      3,      4,       AbsoluteX   ); // +1 if page crossed
+    //opcode_entry!(map,     0x19,      ORA,      3,      4,       AbsoluteY   ); // +1 if page crossed
+    //opcode_entry!(map,     0x01,      ORA,      2,      6,       IndirectX   ); 
+    //opcode_entry!(map,     0x11,      ORA,      2,      5,       IndirectY   ); // +1 if page crosse
 
     /*
         PHA - Push Accumulator
 
         Pushes a copy of the accumulator on to the stack.
     */
-    opcode_entry!(map,     0x48,      PHA,      1,      3,       Implied     );
+    //opcode_entry!(map,     0x48,      PHA,      1,      3,       Implied     );
 
     /*
         PHP - Push Processor Status
 
         Pushes a copy of the status flags on to the stack.
     */
-    opcode_entry!(map,     0x08,      PHP,      1,      3,       Implied     );
+    //opcode_entry!(map,     0x08,      PHP,      1,      3,       Implied     );
 
     /*
         PLA - Pull Accumulator
@@ -431,7 +431,7 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Pulls an 8 bit value from the stack and into the accumulator. The zero
         and negative flags are set as appropriate.
     */
-    opcode_entry!(map,     0x68,      PLA,      1,      4,       Implied     );
+    //opcode_entry!(map,     0x68,      PLA,      1,      4,       Implied     );
 
     /*
         PLP - Pull Processor Status
