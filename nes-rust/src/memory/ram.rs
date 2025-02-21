@@ -6,8 +6,6 @@ pub struct RAM {
 }
 
 impl RAM {
-    const DEFAULT_MIRROR_MASK: u16 = 0x07FF;
-
     pub fn new(start: usize, mirror_mask: u16) -> Self {
         Self { start, mirror_mask }
     }
