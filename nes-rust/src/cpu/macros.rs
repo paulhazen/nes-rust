@@ -30,13 +30,15 @@ macro_rules! define_instruction {
                     crate::cpu::AddressingMode::Immediate => cpu.fetch_immediate(memory),
                     crate::cpu::AddressingMode::ZeroPage  => cpu.fetch_zero_page(memory),
                     crate::cpu::AddressingMode::ZeroPageX => cpu.fetch_zero_page_x(memory),
+                    crate::cpu::AddressingMode::ZeroPageY => cpu.fetch_zero_page_y(memory),
                     crate::cpu::AddressingMode::Absolute  => cpu.fetch_absolute(memory),
                     crate::cpu::AddressingMode::AbsoluteX => cpu.fetch_absolute_x(memory),
                     crate::cpu::AddressingMode::AbsoluteY => cpu.fetch_absolute_y(memory),
+                    crate::cpu::AddressingMode::Indirect => cpu.fetch_indirect(memory),
                     crate::cpu::AddressingMode::IndirectX => cpu.fetch_indirect_x(memory),
                     crate::cpu::AddressingMode::IndirectY => cpu.fetch_indirect_y(memory) ,
                     crate::cpu::AddressingMode::Implied   => 0x00,
-                    _ => panic!(concat!(stringify!($name), " does not support addressing mode: \"{:?}\""), opcode.mode),
+                    crate::cpu::AddressingMode::Accumulator => cpu.get_accumulator(),
                 };
                 
 

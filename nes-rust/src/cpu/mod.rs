@@ -5,6 +5,7 @@ pub mod opcode;
 pub mod status_register;
 pub mod instruction;
 pub mod instructions;
+pub mod opcode_table;
 
 #[macro_use]
 pub mod macros;

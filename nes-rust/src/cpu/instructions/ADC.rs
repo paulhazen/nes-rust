@@ -4,7 +4,9 @@ use crate::memory::MemoryBus;
 use crate::define_instruction;
 
 define_instruction!(ADC, |cpu: &mut CPU, _: &mut MemoryBus, value: u8| {
-    let result = cpu.get_accumulator() as u16 + value as u16 + cpu.processor_status.is_set(StatusRegister::CARRY) as u16;
+    let mut result = cpu.get_accumulator() as u16;
+    result += value as u16;
+    result += cpu.processor_status.is_set(StatusRegister::CARRY) as u16;
 
     if result > 0xFF {
         cpu.processor_status.set(StatusRegister::CARRY);

@@ -2,11 +2,13 @@ use super::ram::RAM;
 use super::rom::ROM;
 use crate::cartridge::{Cartridge};
 use crate::memory::memory_view::MemoryView;
+use std::cell::Cell;
 
 pub struct MemoryBus {
     memory: Box<[u8]>,
-    pub ram: RAM,
-    pub rom: ROM,
+    ram: RAM,
+    rom: ROM,
+    last_read_value: Cell<u8>, // Cell allows the value to be changed without &mut self.
 }
 
 impl MemoryBus {
@@ -18,6 +20,10 @@ impl MemoryBus {
     pub fn load_cartridge(cartridge: Cartridge) -> Self {
         let mut memory = vec![0xFF; 0x10000].into_boxed_slice(); // Initialize all memory
     
+        // Properly set the reset vector
+        memory[0xFFFC] = (Self::RESET_VECTOR_DEFAULT & 0xFF) as u8;
+        memory[0xFFFD] = (Self::RESET_VECTOR_DEFAULT >> 8) as u8;
+
         let prg_rom_size = cartridge.prg_rom.len();
         let prg_rom_start = 0x8000;
     
@@ -34,19 +40,24 @@ impl MemoryBus {
             memory,
             ram: RAM::new(0x0000, 0x07FF),
             rom: ROM::new(0x8000, 0xFFFF),
+            last_read_value: Cell::new(0xFF), // For debugging, it may be wise to randomize this value
         }
     }
-    
 
     pub fn read(&self, address: u16) -> u8 {
-        match address {
+        let value = match address {
             0x0000..=0x1FFF => self.ram.read(&*self.memory, address),
+            0xFFFC => self.memory[0xFFFC], // Explicitly handle the Reset Vector
+            0xFFFD => self.memory[0xFFFD],
             0x8000..=0xFFFF => self.memory[address as usize], // Direct PRG-ROM read
-            _ => 0xFF,
-        }
+            _ => {
+                self.last_read_value.get()
+            }
+        };
+
+        self.last_read_value.set(value);
+        value
     }
-    
-    
 
     pub fn write(&mut self, address: u16, value: u8) {
         match address {
@@ -54,6 +65,17 @@ impl MemoryBus {
             0x8000..=0xFFFF => {} // ROM is read-only
             _ => {},
         }
+    }
+
+    pub fn debug_view_reset_vector(&mut self) {
+        println!(
+            "Reset Vector: {:#06x} -> {:#06x} (Stored: {:#04x} {:#04x}, PC={:#06x})",
+            MemoryBus::RESET_VECTOR_ADDR,
+            MemoryBus::RESET_VECTOR_HIGH_ADDR,
+            self.read(MemoryBus::RESET_VECTOR_ADDR),
+            self.read(MemoryBus::RESET_VECTOR_HIGH_ADDR),
+            ((self.read(MemoryBus::RESET_VECTOR_HIGH_ADDR) as u16) << 8) | (self.read(MemoryBus::RESET_VECTOR_ADDR) as u16)
+        );        
     }
 
     pub fn debug_prg_rom_mapping(&self, start: u16, end: u16) {
