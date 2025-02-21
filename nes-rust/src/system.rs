@@ -19,6 +19,9 @@ impl NES {
     }
 
     pub fn run(&mut self) {
+
+        self.cpu.reset(&self.memory_bus);
+
         loop {
             self.cpu.step(&mut self.memory_bus);
         }

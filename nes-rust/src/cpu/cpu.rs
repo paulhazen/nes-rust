@@ -105,12 +105,11 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
     //*/
     //opcode_entry!(map,     0xD0,      BNE,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
-    ///*
-    //    BPL - Branch if Positive
-
-    //    If the negative flag is clear then add the relative displacement to the program counter to cause a branch to a new location.
-    //*/
-    //opcode_entry!(map,     0x10,      BPL,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    /*
+        BPL - Branch if Positiv
+        If the negative flag is clear then add the relative displacement to the program counter to cause a branch to a new location.
+    */
+    opcode_entry!(map,     0x10,      BPL,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     ///*
     //    BRK - Force Interrupt
@@ -141,13 +140,12 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
     //*/
     //opcode_entry!(map,     0x18,      CLC,      1,      2,       Implied     ); 
 
-    ///*
-    //    CLD - Clear Decimal Mode
-
-    //    D = 0
-    //    Sets the decimal mode flag to zero.
-    //*/
-    //opcode_entry!(map,     0xD8,      CLD,      1,      2,       Implied     ); 
+    /*
+        CLD - Clear Decimal Mod
+        D = 0
+        Sets the decimal mode flag to zero.
+    */
+    opcode_entry!(map,     0xD8,      CLD,      1,      2,       Implied     ); 
 
     ///*
     //    CLI - Clear Interrupt Disable
@@ -211,13 +209,12 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
     //opcode_entry!(map,     0xCE,      DEC,      3,      6,       Absolute    ); 
     //opcode_entry!(map,     0xDE,      DEC,      3,      7,       AbsoluteX   ); 
 
-    ///*
-    //    DEX - Decrement X Register
-
-    //    X,Z,N = X-1
-    //    Subtracts one from the X register setting the zero and negative flags as appropriate.
-    //*/
-    //opcode_entry!(map,     0xCA,      DEX,      1,      2,       Implied     ); 
+    /*
+        DEX - Decrement X Registe
+        X,Z,N = X-1
+        Subtracts one from the X register setting the zero and negative flags as appropriate.
+    */
+    opcode_entry!(map,     0xCA,      DEX,      1,      2,       Implied     ); 
 
     ///*
     //    DEY - Decrement Y Register
@@ -450,13 +447,12 @@ static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
     //*/
     //opcode_entry!(map,     0xF8,      SED,      1,      2,       Implied     ); 
 
-    ///*
-    //    SEI - Set Interrupt Disable
-
-    //    I = 1
-    //    Set the interrupt disable flag to one.
-    //*/
-    //opcode_entry!(map,     0x78,      SEI,      1,      2,       Implied     ); 
+    /*
+        SEI - Set Interrupt Disabl
+        I = 1
+        Set the interrupt disable flag to one.
+    */
+    opcode_entry!(map,     0x78,      SEI,      1,      2,       Implied     ); 
 
     /*
         STA - Store Accumulato
