@@ -12,12 +12,12 @@ impl StatusRegister {
         explicitly set using the 'Set Carry Flag' (SEC) instruction and 
         cleared with the 'Clear Carry Flag' (CLC).
      */
-    const CARRY: u8 = 1 << 0;
+    pub const CARRY: u8 = 1 << 0;
 
     /*
         The zero flag is set if the result of the last operation was zero.
      */
-    const ZERO: u8 = 1 << 1;
+    pub const ZERO: u8 = 1 << 1;
 
     /*
         The interrupt disable flag is set if the program has executed a 
@@ -25,7 +25,7 @@ impl StatusRegister {
         processor will not respond to interrupts from devices until it is 
         cleared by a 'Clear Interrupt Disable' (CLI) instruction.
      */
-    const INTERRUPT_DISABLE: u8 = 1 << 2;
+    pub const INTERRUPT_DISABLE: u8 = 1 << 2;
 
     /*
         While the decimal mode flag is set the processor will obey the rules of
@@ -33,13 +33,13 @@ impl StatusRegister {
         The flag can be explicitly set using 'Set Decimal Flag' (SED) and 
         cleared with 'Clear Decimal Flag' (CLD).
      */
-    const DECIMAL: u8 = 1 << 3;
+    pub const DECIMAL: u8 = 1 << 3;
 
     /*
         The break command bit is set when a BRK instruction has been executed 
         and an interrupt has been generated to process it.
      */
-    const BREAK: u8 = 1 << 4;
+    pub const BREAK: u8 = 1 << 4;
 
     /*
         In the NES CPU (Obelisk 6502) this bit is always 1 for historical 
@@ -54,13 +54,13 @@ impl StatusRegister {
         determined by looking at the carry between bits 6 and 7 and between bit
         7 and the carry flag.
      */
-    const OVERFLOW: u8 = 1 << 6;
+    pub const OVERFLOW: u8 = 1 << 6;
 
     /*
         The negative flag is set if the result of the last operation had bit 7
         set to a one.
      */
-    const NEGATIVE: u8 = 1 << 7;
+    pub const NEGATIVE: u8 = 1 << 7;
 
     /*
         Note:

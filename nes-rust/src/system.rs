@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use crate::cpu::CPU;
 use crate::memory::MemoryBus;
 use crate::cartridge::Cartridge;

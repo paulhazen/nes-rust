@@ -2,6 +2,9 @@ use crate::cpu::instruction::Instruction;
 use crate::cpu::CPU;
 use crate::cpu::instruction_mnemonic::InstructionMnemonic;
 use crate::cpu::addressing_mode::AddressingMode;
+use crate::memory::MemoryBus;
+
+pub type InstructionFactory = fn() -> Box<dyn Instruction + 'static>;
 
 pub struct OpCode {
     // The Three letter mnemonic for the particular opcode.
@@ -15,6 +18,10 @@ pub struct OpCode {
 
     // The number of clock cycles the opcode takes to execute.
     pub cycles: u8,
+
+    // Function to create the instruction struct that implements the 
+    // Instruction trait.
+    pub factory: InstructionFactory,
 }
 
 pub struct OpCodeExecutor<T: Instruction> {
@@ -27,7 +34,7 @@ impl<T: Instruction> OpCodeExecutor<T> {
         Self {opcode, executor }
     }
 
-    pub fn execute(&self, cpu: &mut CPU) {
-        self.executor.execute(cpu, &self.opcode);
+    pub fn execute(&self, cpu: &mut CPU, memory: &mut MemoryBus) {
+        self.executor.execute(cpu, &self.opcode, memory);
     }
 }
