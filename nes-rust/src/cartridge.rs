@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::{self, BufReader, Read};
-use crate::constants;
 
 /// Represents an NES cartridge.
 pub struct Cartridge {
@@ -23,6 +22,8 @@ pub struct CartridgeHeader {
 }
 
 impl Cartridge {
+    const NES_HEADER_START: [u8; 3] = [0x4E, 0x45, 0x53];
+
     /// Loads an NES cartridge from a specified file path.
     ///
     /// # Arguments
@@ -108,7 +109,7 @@ impl Cartridge {
         reader.read_exact(&mut buffer)?;
 
         // Validate NES header signature
-        if !buffer.starts_with(&constants::NES_HEADER_START) {
+        if !buffer.starts_with(&Cartridge::NES_HEADER_START) {
             return Err(io::Error::new(io::ErrorKind::InvalidData, "Not a valid NES file."));
         } else {
             println!("INFO: File has a valid HEADER intro.");
