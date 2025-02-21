@@ -1,1 +1,10 @@
+use crate::cpu::status_register::StatusRegister;
+use crate::cpu::CPU;
+use crate::memory::MemoryBus;
+use crate::define_instruction;
 
+define_instruction!(BEQ, |cpu: &mut CPU, memory, operand: u8| {
+    if cpu.processor_status.is_set(StatusRegister::ZERO) {
+        //cpu.branch(memory, offset);
+    }
+});
