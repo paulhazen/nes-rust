@@ -717,6 +717,15 @@ impl CPU {
         self.y_register = value;
     }
 
+    pub fn branch(&mut self, _: &mut MemoryBus, condition: bool, offset: u8) {
+        if condition {
+            let signed_offset = offset as i8 as i16; // Sign-extend the 8-bit offset
+            let new_pc = self.get_program_counter().wrapping_add(signed_offset as u16);
+            self.set_program_counter(new_pc);
+        }
+    }
+    
+
     // endregion: Accessor methods
 
     pub fn execute(&mut self, opcode: u8, memory: &mut MemoryBus) {

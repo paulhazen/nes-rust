@@ -56,5 +56,13 @@ impl MemoryBus {
         }
     }
 
+    pub fn debug_prg_rom_mapping(&self, start: u16, end: u16) {
+        println!("PRG-ROM Mapping from {:#06X} to {:#06X}:", start, end);
+        for addr in (start..=end).step_by(16) { // Print every 16 bytes for readability
+            let mapped_value = self.read(addr);
+            println!("{:#06X}: {:#04X}", addr, mapped_value);
+        }
+    }
+
     // endregion: Helper Functions
 }

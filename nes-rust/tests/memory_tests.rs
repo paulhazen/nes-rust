@@ -102,4 +102,90 @@ mod tests {
         assert_eq!(bus.read(0x7000), 0xFF); // Unmapped memory
         assert_eq!(bus.read(0x401F), 0xFF); // APU/IO (not handled yet)
     }
+
+    #[test]
+    fn test_reset_vector_fetch() {
+        let mut prg_rom_data = vec![0; 16 * 1024]; // 16KB ROM
+        prg_rom_data[0xFFFC - 0x8000] = 0x00; // LSB of reset vector
+        prg_rom_data[0xFFFD - 0x8000] = 0x80; // MSB of reset vector (0x8000 start address)
+
+        let cartridge = create_test_cartridge(prg_rom_data);
+        let bus = MemoryBus::load_cartridge(cartridge);
+
+        assert_eq!(bus.read(0xFFFC), 0x00);
+        assert_eq!(bus.read(0xFFFD), 0x80);
+    }
+
+    #[test]
+    fn test_debug_prg_rom_mapping() {
+        let prg_rom_data = vec![0xAA; 16 * 1024]; // Fill PRG-ROM with 0xAA
+        let cartridge = create_test_cartridge(prg_rom_data);
+        let bus = MemoryBus::load_cartridge(cartridge);
+
+        // Debug first and second PRG-ROM banks
+        bus.debug_prg_rom_mapping(0x8000, 0xBFFF);
+        bus.debug_prg_rom_mapping(0xC000, 0xFFFF);
+    }
+
+
+    #[test]
+    fn test_prg_rom_bank_switching() {
+        let prg_rom_data = vec![0x11; 32 * 1024]; // 32KB ROM
+        let cartridge = create_test_cartridge(prg_rom_data);
+        let mut bus = MemoryBus::load_cartridge(cartridge);
+
+        // Assume the mapper allows switching banks, we simulate a bank switch here.
+        bus.write(0x8000, 1); // Example: Switch to bank 1
+        assert_eq!(bus.read(0x8000), 0x11);
+    }
+
+    #[test]
+    fn test_open_bus_behavior() {
+        let cartridge = create_test_cartridge(vec![0; 16 * 1024]); // Empty PRG-ROM (16KB)
+        let mut bus = MemoryBus::load_cartridge(cartridge);
+
+        // Write a known value to RAM, then read from unmapped memory
+        bus.write(0x0000, 0x37);
+        let last_value = bus.read(0x0000);
+
+        // Reading from an unmapped region should return last_value (unless explicitly FF)
+        let open_bus_value = bus.read(0x5000);
+        assert!(open_bus_value == 0xFF || open_bus_value == last_value);
+    }
+
+    #[test]
+    fn test_ram_mirroring_consistency() {
+        let cartridge = create_test_cartridge(vec![0; 16 * 1024]); // Empty PRG-ROM (16KB)
+        let mut bus = MemoryBus::load_cartridge(cartridge);
+
+        // Write at a mirrored region
+        bus.write(0x1000, 0x77);
+
+        // Check all mirrored locations
+        assert_eq!(bus.read(0x0000), 0x77);
+        assert_eq!(bus.read(0x0800), 0x77);
+        assert_eq!(bus.read(0x1800), 0x77);
+    }
+
+    #[test]
+    fn test_write_to_io_registers() {
+        let cartridge = create_test_cartridge(vec![0; 16 * 1024]); // Empty PRG-ROM (16KB)
+        let mut bus = MemoryBus::load_cartridge(cartridge);
+
+        bus.write(0x4016, 0x55); // Attempt to write to controller port
+
+        // Read should return default behavior (not the written value)
+        assert!(bus.read(0x4016) != 0x55);
+    }
+
+    #[test]
+    fn test_uninitialized_sram() {
+        let cartridge = create_test_cartridge(vec![0; 16 * 1024]); // Empty PRG-ROM (16KB)
+        let bus = MemoryBus::load_cartridge(cartridge);
+
+        // Check if SRAM defaults to 0xFF (or any expected uninitialized value)
+        assert_eq!(bus.read(0x6000), 0xFF);
+    }
+
+
 }
