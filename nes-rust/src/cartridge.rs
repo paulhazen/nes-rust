@@ -89,8 +89,6 @@ impl Cartridge {
             0xFF // Invalid read
         }
     }
-    
-    
 
     /// Reads and validates the NES file header.
     ///

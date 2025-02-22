@@ -26,18 +26,18 @@ mod tests {
 
         // Write to RAM at $0000
         bus.write(0x0000, 0x42);
-        assert_eq!(bus.read(0x0000), 0x42);
+        assert_eq!(bus.read_byte(0x0000), 0x42);
 
         // Test mirroring ($0000 - $07FF mirrors up to $1FFF)
-        assert_eq!(bus.read(0x0800), 0x42);
-        assert_eq!(bus.read(0x1000), 0x42);
-        assert_eq!(bus.read(0x1800), 0x42);
+        assert_eq!(bus.read_byte(0x0800), 0x42);
+        assert_eq!(bus.read_byte(0x1000), 0x42);
+        assert_eq!(bus.read_byte(0x1800), 0x42);
 
         // Write at another mirrored location and check all mirrors
         bus.write(0x07FF, 0x99);
-        assert_eq!(bus.read(0x07FF), 0x99);
-        assert_eq!(bus.read(0x0FFF), 0x99);
-        assert_eq!(bus.read(0x17FF), 0x99);
+        assert_eq!(bus.read_byte(0x07FF), 0x99);
+        assert_eq!(bus.read_byte(0x0FFF), 0x99);
+        assert_eq!(bus.read_byte(0x17FF), 0x99);
     }
 
     #[test]
@@ -47,14 +47,14 @@ mod tests {
         let bus = MemoryBus::load_cartridge(cartridge);
 
         // Read from PRG-ROM ($8000-$BFFF) - Should be 0xAA
-        assert_eq!(bus.read(0x8000), 0xAA);
-        assert_eq!(bus.read(0x9000), 0xAA);
-        assert_eq!(bus.read(0xBFFF), 0xAA);
+        assert_eq!(bus.read_byte(0x8000), 0xAA);
+        assert_eq!(bus.read_byte(0x9000), 0xAA);
+        assert_eq!(bus.read_byte(0xBFFF), 0xAA);
 
         // Read from PRG-ROM mirrored region ($C000-$FFFF) - Should also be 0xAA
-        assert_eq!(bus.read(0xC000), 0xAA);
-        assert_eq!(bus.read(0xD000), 0xAA);
-        assert_eq!(bus.read(0xFFFF), 0xAA);
+        assert_eq!(bus.read_byte(0xC000), 0xAA);
+        assert_eq!(bus.read_byte(0xD000), 0xAA);
+        assert_eq!(bus.read_byte(0xFFFF), 0xAA);
     }
 
     #[test]
@@ -64,14 +64,14 @@ mod tests {
         let bus = MemoryBus::load_cartridge(cartridge);
 
         // Read from first 16KB bank ($8000-$BFFF) - Should be 0x55
-        assert_eq!(bus.read(0x8000), 0x55);
-        assert_eq!(bus.read(0x9000), 0x55);
-        assert_eq!(bus.read(0xBFFF), 0x55);
+        assert_eq!(bus.read_byte(0x8000), 0x55);
+        assert_eq!(bus.read_byte(0x9000), 0x55);
+        assert_eq!(bus.read_byte(0xBFFF), 0x55);
 
         // Read from second 16KB bank ($C000-$FFFF) - Should be 0x55 (not mirrored)
-        assert_eq!(bus.read(0xC000), 0x55);
-        assert_eq!(bus.read(0xD000), 0x55);
-        assert_eq!(bus.read(0xFFFF), 0x55);
+        assert_eq!(bus.read_byte(0xC000), 0x55);
+        assert_eq!(bus.read_byte(0xD000), 0x55);
+        assert_eq!(bus.read_byte(0xFFFF), 0x55);
     }
 
     #[test]
@@ -86,9 +86,9 @@ mod tests {
         bus.write(0xBFFF, 0x77);
 
         // ROM should still be read-only (original values should be unchanged)
-        assert_eq!(bus.read(0x8000), 0xBB);
-        assert_eq!(bus.read(0x9000), 0xBB);
-        assert_eq!(bus.read(0xBFFF), 0xBB);
+        assert_eq!(bus.read_byte(0x8000), 0xBB);
+        assert_eq!(bus.read_byte(0x9000), 0xBB);
+        assert_eq!(bus.read_byte(0xBFFF), 0xBB);
     }
 
     #[test]
@@ -97,10 +97,10 @@ mod tests {
         let bus = MemoryBus::load_cartridge(cartridge);
 
         // Addresses outside RAM/ROM should return 0xFF
-        assert_eq!(bus.read(0x5000), 0xFF); // Expansion ROM (unused)
-        assert_eq!(bus.read(0x6000), 0xFF); // SRAM (not enabled in NROM)
-        assert_eq!(bus.read(0x7000), 0xFF); // Unmapped memory
-        assert_eq!(bus.read(0x401F), 0xFF); // APU/IO (not handled yet)
+        assert_eq!(bus.read_byte(0x5000), 0xFF); // Expansion ROM (unused)
+        assert_eq!(bus.read_byte(0x6000), 0xFF); // SRAM (not enabled in NROM)
+        assert_eq!(bus.read_byte(0x7000), 0xFF); // Unmapped memory
+        assert_eq!(bus.read_byte(0x401F), 0xFF); // APU/IO (not handled yet)
     }
 
     #[test]
@@ -112,8 +112,8 @@ mod tests {
         let cartridge = create_test_cartridge(prg_rom_data);
         let bus = MemoryBus::load_cartridge(cartridge);
 
-        assert_eq!(bus.read(0xFFFC), 0x00);
-        assert_eq!(bus.read(0xFFFD), 0x80);
+        assert_eq!(bus.read_byte(0xFFFC), 0x00);
+        assert_eq!(bus.read_byte(0xFFFD), 0x80);
     }
 
     #[test]
@@ -136,7 +136,7 @@ mod tests {
 
         // Assume the mapper allows switching banks, we simulate a bank switch here.
         bus.write(0x8000, 1); // Example: Switch to bank 1
-        assert_eq!(bus.read(0x8000), 0x11);
+        assert_eq!(bus.read_byte(0x8000), 0x11);
     }
 
     #[test]
@@ -146,10 +146,10 @@ mod tests {
 
         // Write a known value to RAM, then read from unmapped memory
         bus.write(0x0000, 0x37);
-        let last_value = bus.read(0x0000);
+        let last_value = bus.read_byte(0x0000);
 
         // Reading from an unmapped region should return last_value (unless explicitly FF)
-        let open_bus_value = bus.read(0x5000);
+        let open_bus_value = bus.read_byte(0x5000);
         assert!(open_bus_value == 0xFF || open_bus_value == last_value);
     }
 
@@ -162,9 +162,9 @@ mod tests {
         bus.write(0x1000, 0x77);
 
         // Check all mirrored locations
-        assert_eq!(bus.read(0x0000), 0x77);
-        assert_eq!(bus.read(0x0800), 0x77);
-        assert_eq!(bus.read(0x1800), 0x77);
+        assert_eq!(bus.read_byte(0x0000), 0x77);
+        assert_eq!(bus.read_byte(0x0800), 0x77);
+        assert_eq!(bus.read_byte(0x1800), 0x77);
     }
 
     #[test]
@@ -175,7 +175,7 @@ mod tests {
         bus.write(0x4016, 0x55); // Attempt to write to controller port
 
         // Read should return default behavior (not the written value)
-        assert!(bus.read(0x4016) != 0x55);
+        assert!(bus.read_byte(0x4016) != 0x55);
     }
 
     #[test]
@@ -184,7 +184,7 @@ mod tests {
         let bus = MemoryBus::load_cartridge(cartridge);
 
         // Check if SRAM defaults to 0xFF (or any expected uninitialized value)
-        assert_eq!(bus.read(0x6000), 0xFF);
+        assert_eq!(bus.read_byte(0x6000), 0xFF);
     }
 
 

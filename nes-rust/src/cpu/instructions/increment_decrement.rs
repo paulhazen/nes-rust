@@ -24,17 +24,3 @@ define_instruction!(DEY, |cpu: &mut CPU, _: &mut MemoryBus, _: u8| {
     cpu.set_y(new_y);
     cpu.update_zero_and_negative_flags(new_y);
 });
-
-//define_instruction!(INC, |cpu: &mut CPU, memory: &mut MemoryBus, address: u8| {
-//    let addr = cpu.get_effective_address(address);
-//    let value = memory.read(addr).wrapping_add(1);
-//    memory.write(addr, value);
-//    cpu.update_zero_and_negative_flags(value);
-//});
-//
-//define_instruction!(DEC, |cpu: &mut CPU, memory: &mut MemoryBus, address: u8| {
-//    let addr = cpu.get_effective_address(address);
-//    let value = memory.read(addr).wrapping_sub(1);
-//    memory.write(addr, value);
-//    cpu.update_zero_and_negative_flags(value);
-//});
