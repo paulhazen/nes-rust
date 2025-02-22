@@ -1,15 +1,20 @@
-pub mod addressing_mode;
-pub mod cpu;
-pub mod instruction_mnemonic;
-pub mod opcode;
-pub mod status_register;
-pub mod instruction;
-pub mod instructions;
-pub mod opcode_table;
+mod addressing_mode;
+mod cpu;
+mod instruction_mnemonic;
+mod opcode;
+mod status_register;
+mod instruction;
+mod instructions;
+mod opcode_table;
+mod decoded_instruction;
+mod instruction_metadata;
+
 
 #[macro_use]
 pub mod macros;
 
-pub use instruction_mnemonic::InstructionMnemonic;
-pub use addressing_mode::AddressingMode;
+use status_register::Status;
+use instruction_metadata::InstructionMetadata;
+use instruction_mnemonic::InstructionMnemonic;
+use addressing_mode::AddressingMode;
 pub use cpu::CPU;

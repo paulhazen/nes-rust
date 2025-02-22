@@ -1,9 +1,9 @@
-use crate::cpu::status_register::StatusRegister;
 use crate::cpu::CPU;
+use crate::cpu::Status;
 use crate::define_instruction;
 
 define_instruction!(BPL, |cpu: &mut CPU, memory, operand : u8| {
-    let not_negative = !cpu.processor_status.is_set(StatusRegister::NEGATIVE);
-    cpu.branch(memory, not_negative, operand);
+    let is_positive = !cpu.is_flag_set(Status::NEGATIVE);
+    cpu.branch(memory, is_positive, operand)
 });
 

@@ -1,0 +1,93 @@
+define_instruction!(BCC, |cpu, _, offset| {
+    cpu.branch(_, !cpu.processor_status.is_set(StatusRegister::CARRY), offset);
+});
+
+define_instruction!(BCS, |cpu, _, offset| {
+    cpu.branch(_, cpu.processor_status.is_set(StatusRegister::CARRY), offset);
+});
+
+define_instruction!(BMI, |cpu, _, offset| {
+    cpu.branch(_, cpu.processor_status.is_set(StatusRegister::NEGATIVE), offset);
+});
+
+define_instruction!(BNE, |cpu, _, offset| {
+    cpu.branch(_, !cpu.processor_status.is_set(StatusRegister::ZERO), offset);
+});
+
+define_instruction!(BRK, |cpu, memory, _| {
+    cpu.push_stack(memory, (cpu.get_program_counter() >> 8) as u8);
+    cpu.push_stack(memory, cpu.get_program_counter() as u8);
+    cpu.push_stack(memory, cpu.processor_status.get());
+    cpu.processor_status.set(StatusRegister::BREAK);
+    cpu.set_program_counter(memory.read_u16(0xFFFE));
+});
+
+define_instruction!(BVC, |cpu, _, offset| {
+    cpu.branch(_, !cpu.processor_status.is_set(StatusRegister::OVERFLOW), offset);
+});
+
+define_instruction!(BVS, |cpu, _, offset| {
+    cpu.branch(_, cpu.processor_status.is_set(StatusRegister::OVERFLOW), offset);
+});
+
+define_instruction!(CPX, |cpu, _, value| {
+    let result = cpu.get_x_register().wrapping_sub(value);
+    cpu.processor_status.set_or_clear(StatusRegister::CARRY, cpu.get_x_register() >= value);
+    cpu.update_zero_and_negative_flags(result);
+});
+
+define_instruction!(CPY, |cpu, _, value| {
+    let result = cpu.get_y_register().wrapping_sub(value);
+    cpu.processor_status.set_or_clear(StatusRegister::CARRY, cpu.get_y_register() >= value);
+    cpu.update_zero_and_negative_flags(result);
+});
+
+define_instruction!(DEC, |cpu, memory, address| {
+    let value = memory.read(address).wrapping_sub(1);
+    memory.write(address, value);
+    cpu.update_zero_and_negative_flags(value);
+});
+
+define_instruction!(INC, |cpu, memory, address| {
+    let value = memory.read(address).wrapping_add(1);
+    memory.write(address, value);
+    cpu.update_zero_and_negative_flags(value);
+});
+
+define_instruction!(JMP, |cpu, _, address| {
+    cpu.set_program_counter(address);
+});
+
+define_instruction!(LSR, |cpu, memory, address| {
+    let value = memory.read(address);
+    cpu.processor_status.set_or_clear(StatusRegister::CARRY, value & 0x01 != 0);
+    let result = value >> 1;
+    memory.write(address, result);
+    cpu.update_zero_and_negative_flags(result);
+});
+
+define_instruction!(ROL, |cpu, memory, address| {
+    let value = memory.read(address);
+    let carry = if cpu.processor_status.is_set(StatusRegister::CARRY) { 1 } else { 0 };
+    cpu.processor_status.set_or_clear(StatusRegister::CARRY, value & 0x80 != 0);
+    let result = (value << 1) | carry;
+    memory.write(address, result);
+    cpu.update_zero_and_negative_flags(result);
+});
+
+define_instruction!(ROR, |cpu, memory, address| {
+    let value = memory.read(address);
+    let carry = if cpu.processor_status.is_set(StatusRegister::CARRY) { 0x80 } else { 0 };
+    cpu.processor_status.set_or_clear(StatusRegister::CARRY, value & 0x01 != 0);
+    let result = (value >> 1) | carry;
+    memory.write(address, result);
+    cpu.update_zero_and_negative_flags(result);
+});
+
+define_instruction!(SBC, |cpu, _, value| {
+    let carry = if cpu.processor_status.is_set(StatusRegister::CARRY) { 0 } else { 1 };
+    let result = cpu.get_accumulator().wrapping_sub(value).wrapping_sub(carry);
+    cpu.processor_status.set_or_clear(StatusRegister::CARRY, cpu.get_accumulator() >= value + carry);
+    cpu.update_zero_and_negative_flags(result);
+    cpu.set_accumulator(result);
+});

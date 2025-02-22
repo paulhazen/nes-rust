@@ -38,7 +38,7 @@ macro_rules! define_instruction {
                     crate::cpu::AddressingMode::IndirectX => cpu.fetch_indirect_x(memory),
                     crate::cpu::AddressingMode::IndirectY => cpu.fetch_indirect_y(memory) ,
                     crate::cpu::AddressingMode::Implied   => 0x00,
-                    crate::cpu::AddressingMode::Accumulator => cpu.get_accumulator(),
+                    crate::cpu::AddressingMode::Accumulator => cpu.get_a(),
                 };
                 
 
