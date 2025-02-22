@@ -1,32 +1,48 @@
-use crate::cpu::status_register::StatusRegister;
 use crate::cpu::instruction::Instruction;
 use crate::cpu::opcode::OpCodeExecutor;
 use crate::memory::MemoryBus;
 use super::opcode::OpCode;
 use super::opcode_table::OPCODE_TABLE;
+use super::Status;
 
 pub struct CPU {
-    accumulator: u8,
-    x_register: u8,
-    y_register: u8,
-    program_counter: u16,             
-    stack_pointer: u8,
-    pub processor_status: StatusRegister,
+    a: u8,
+    x: u8,
+    y: u8,
+    pc: u16,             
+    s: u8,
+    p: u8,
     current_opcode: Option<OpCode>,
 }
 
 impl CPU {
     pub fn new() -> Self {
         CPU {
-            accumulator: 0, 
-            x_register: 0,
-            y_register: 0, 
-            program_counter: 0x8000, // NES program entry point
-            stack_pointer: 0xFD,
-            processor_status: StatusRegister::new(),
+            a: 0, 
+            x: 0,
+            y: 0, 
+            pc: 0x8000, // NES program entry point
+            s: 0xFD,
+            p: Status::UNUSED.bits(),
             current_opcode: None,
         }
     }
+
+    // startregion: Functions to utilize the status register within the CPU
+
+    pub fn is_flag_set(&self, flag: Status) -> bool {
+        self.p & flag.bits() != 0
+    }
+
+    pub fn set_flag(&mut self, flag: Status, condition:bool) {
+        if condition {
+            self.p |= flag.bits()
+        } else {
+            self.p &= !flag.bits()
+        }
+    }
+
+    // endregion: Functions to utilize the status register within the CPU
 
     pub fn step(&mut self, memory: &mut MemoryBus) {
         let opcode = self.fetch_byte(memory);
@@ -35,21 +51,21 @@ impl CPU {
 
     pub fn pull_stack(&mut self, memory: &MemoryBus) -> u8 {
         // Stack is located at $0100–$01FF, so we add 0x100 to the stack pointer
-        let address = 0x0100 | self.get_stack_pointer() as u16;
+        let address = 0x0100 | self.get_s() as u16;
 
         // Read the value from memory at the computed stack address
         let value = memory.read(address);
 
         // Increment stack pointer (stack grows downward in 6502, so popping moves it up)
-        self.set_stack_pointer(self.get_stack_pointer().wrapping_add(1));
+        self.set_s(self.get_s().wrapping_add(1));
 
         value
     }
     
     pub fn push_stack(&mut self, memory: &mut MemoryBus, value: u8) {
-        let stack_address = 0x0100 | (self.stack_pointer as u16); // Stack is at $0100 - $01FF
+        let stack_address = 0x0100 | (self.s as u16); // Stack is at $0100 - $01FF
         memory.write(stack_address, value);  // Store value in memory
-        self.stack_pointer = self.stack_pointer.wrapping_sub(1); // Decrement SP
+        self.s = self.s.wrapping_sub(1); // Decrement SP
     }
 
     // region: Setter / Getter methods
@@ -62,51 +78,51 @@ impl CPU {
         self.current_opcode.as_ref()
     }
 
-    pub fn get_stack_pointer(&self) -> u8 {
-        self.stack_pointer
+    pub fn get_s(&self) -> u8 {
+        self.s
     }
 
-    pub fn set_stack_pointer(&mut self, value: u8) {
-        self.stack_pointer = value;
+    pub fn set_s(&mut self, value: u8) {
+        self.s = value;
     }
 
-    pub fn get_program_counter(&self) -> u16 {
-        self.program_counter
+    pub fn get_pc(&self) -> u16 {
+        self.pc
     }
 
-    pub fn set_program_counter(&mut self, value: u16) {
-        self.program_counter = value
+    pub fn set_pc(&mut self, value: u16) {
+        self.pc = value
     }
 
-    pub fn get_accumulator(&self) -> u8 {
-        self.accumulator
+    pub fn get_a(&self) -> u8 {
+        self.a
     }
 
-    pub fn set_accumulator(&mut self, value: u8) {
-        self.accumulator = value;
+    pub fn set_a(&mut self, value: u8) {
+        self.a = value;
     }
 
-    pub fn get_x_register(&self) -> u8 {
-        self.x_register
+    pub fn get_x(&self) -> u8 {
+        self.x
     }
 
-    pub fn set_x_register(&mut self, value: u8) {
-        self.x_register = value;
+    pub fn set_x(&mut self, value: u8) {
+        self.x = value;
     }
 
-    pub fn get_y_register(&self) -> u8 {
-        self.y_register
+    pub fn get_y(&self) -> u8 {
+        self.y
     }
 
-    pub fn set_y_register(&mut self, value: u8) {
-        self.y_register = value;
+    pub fn set_y(&mut self, value: u8) {
+        self.y = value;
     }
 
     pub fn branch(&mut self, _: &mut MemoryBus, condition: bool, offset: u8) {
         if condition {
             let signed_offset = offset as i8 as i16; // Sign-extend the 8-bit offset
-            let new_pc = self.get_program_counter().wrapping_add(signed_offset as u16);
-            self.set_program_counter(new_pc);
+            let new_pc = self.get_pc().wrapping_add(signed_offset as u16);
+            self.set_pc(new_pc);
         }
     }
     
@@ -136,15 +152,8 @@ impl CPU {
     }
 
     pub fn update_zero_and_negative_flags(&mut self, value: u8) {
-        // Update Zero flag (Z): Set if value is 0
-        if value == 0 {
-            self.processor_status.set(StatusRegister::ZERO);
-        }
-
-        // Update Negative flag (N): Set if the highest bit (bit 7) is 1
-        if value & 0b1000_0000 != 0 {
-            self.processor_status.set(StatusRegister::NEGATIVE);
-        }
+        self.set_flag(Status::ZERO, value == 0);
+        self.set_flag(Status::NEGATIVE, value & 0b1000_000 != 0);
     }
 
     /**
@@ -159,10 +168,10 @@ impl CPU {
         let low_byte = memory.read(MemoryBus::RESET_VECTOR_ADDR) as u16;
         let high_byte = memory.read(MemoryBus::RESET_VECTOR_HIGH_ADDR) as u16;
 
-        self.program_counter = (high_byte << 8) | low_byte;
+        self.pc = (high_byte << 8) | low_byte;
 
         // Reset the processor status
-        self.processor_status.reset()
+        self.p = Status::UNUSED.bits()
     }
 
     // startregion: Fetch functions
@@ -181,12 +190,12 @@ impl CPU {
     }
 
     pub fn fetch_zero_page_x(&mut self, memory: &MemoryBus) -> u8 {
-        let address = self.fetch_byte(memory).wrapping_add(self.get_x_register()) as u16;
+        let address = self.fetch_byte(memory).wrapping_add(self.x) as u16;
         memory.read(address)
     }
 
     pub fn fetch_zero_page_y(&mut self, memory: &MemoryBus) -> u8 {
-        let address = self.fetch_byte(memory).wrapping_add(self.y_register) as u16;
+        let address = self.fetch_byte(memory).wrapping_add(self.y) as u16;
         memory.read(address)
     }
 
@@ -201,7 +210,7 @@ impl CPU {
         let low = self.fetch_byte(memory) as u16;
         let high = self.fetch_byte(memory) as u16;
         let base_address = (high << 8) | low;
-        let address = base_address.wrapping_add(self.get_x_register() as u16);
+        let address = base_address.wrapping_add(self.x as u16);
         memory.read(address)
     }
 
@@ -209,7 +218,7 @@ impl CPU {
         let low = self.fetch_byte(memory) as u16;
         let high = self.fetch_byte(memory) as u16;
         let base_address = (high << 8) | low;
-        let address = base_address.wrapping_add(self.get_y_register() as u16);
+        let address = base_address.wrapping_add(self.y as u16);
         memory.read(address)
     }
 
@@ -227,7 +236,7 @@ impl CPU {
 
     pub fn fetch_indirect_x(&mut self, memory: &MemoryBus) -> u8 {
         let base_address = self.fetch_byte(memory);
-        let zero_page_address = base_address.wrapping_add(self.get_x_register());
+        let zero_page_address = base_address.wrapping_add(self.x);
 
         let low = memory.read(zero_page_address as u16) as u16;
         let high = memory.read(zero_page_address.wrapping_add(1) as u16) as u16;
@@ -242,21 +251,21 @@ impl CPU {
         let low = memory.read(base_address as u16) as u16;
         let high = memory.read(base_address.wrapping_add(1) as u16) as u16;
         let base_address = (high << 8) | low;
-        let effective_address = base_address.wrapping_add(self.get_y_register() as u16);
+        let effective_address = base_address.wrapping_add(self.y as u16);
 
         memory.read(effective_address)
     }
 
     pub fn fetch_byte(&mut self, memory: &MemoryBus) -> u8 {
-        let opcode = memory.read(self.program_counter);
-        self.program_counter = self.program_counter.wrapping_add(1);
+        let opcode = memory.read(self.pc);
+        self.pc = self.pc.wrapping_add(1);
         opcode
     }
 
     pub fn fetch_word(&mut self, memory: &MemoryBus) -> u16 {
-        let low = memory.read(self.program_counter) as u16;
-        let high = memory.read(self.program_counter.wrapping_add(1)) as u16;
-        self.program_counter = self.program_counter.wrapping_add(2);
+        let low = memory.read(self.pc) as u16;
+        let high = memory.read(self.pc.wrapping_add(1)) as u16;
+        self.pc = self.pc.wrapping_add(2);
         (high << 8) | low // Little-endian: low byte first, then high byte
     }
 
