@@ -44,7 +44,13 @@ impl MemoryBus {
         }
     }
 
-    pub fn read(&self, address: u16) -> u8 {
+    pub fn read_word(&self, address: u16) -> u16 {
+        let low_byte = self.read_byte(address) as u16;
+        let high_byte = self.read_byte(address.wrapping_add(1)) as u16;
+        (high_byte << 8) | low_byte
+    }
+
+    pub fn read_byte(&self, address: u16) -> u8 {
         let value = match address {
             0x0000..=0x1FFF => self.ram.read(&*self.memory, address),
             0xFFFC => self.memory[0xFFFC], // Explicitly handle the Reset Vector
@@ -72,16 +78,16 @@ impl MemoryBus {
             "Reset Vector: {:#06x} -> {:#06x} (Stored: {:#04x} {:#04x}, PC={:#06x})",
             MemoryBus::RESET_VECTOR_ADDR,
             MemoryBus::RESET_VECTOR_HIGH_ADDR,
-            self.read(MemoryBus::RESET_VECTOR_ADDR),
-            self.read(MemoryBus::RESET_VECTOR_HIGH_ADDR),
-            ((self.read(MemoryBus::RESET_VECTOR_HIGH_ADDR) as u16) << 8) | (self.read(MemoryBus::RESET_VECTOR_ADDR) as u16)
+            self.read_byte(MemoryBus::RESET_VECTOR_ADDR),
+            self.read_byte(MemoryBus::RESET_VECTOR_HIGH_ADDR),
+            ((self.read_byte(MemoryBus::RESET_VECTOR_HIGH_ADDR) as u16) << 8) | (self.read_byte(MemoryBus::RESET_VECTOR_ADDR) as u16)
         );        
     }
 
     pub fn debug_prg_rom_mapping(&self, start: u16, end: u16) {
         println!("PRG-ROM Mapping from {:#06X} to {:#06X}:", start, end);
         for addr in (start..=end).step_by(16) { // Print every 16 bytes for readability
-            let mapped_value = self.read(addr);
+            let mapped_value = self.read_byte(addr);
             println!("{:#06X}: {:#04X}", addr, mapped_value);
         }
     }
