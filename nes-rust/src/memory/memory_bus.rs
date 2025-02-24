@@ -9,6 +9,11 @@ pub struct MemoryBus {
     ram: RAM,
     rom: ROM,
     last_read_value: Cell<u8>, // Cell allows the value to be changed without &mut self.
+
+    // internal counter to measure how many interactions have been done,
+    // in an effort to approximate the number of cycles that should have
+    // executed
+    cycle_counter: Cell<u8>,
 }
 
 impl MemoryBus {
@@ -16,6 +21,14 @@ impl MemoryBus {
     pub const RESET_VECTOR_ADDR: u16 = 0xFFFC;
     pub const RESET_VECTOR_HIGH_ADDR: u16 = 0xFFFD;
     pub const RESET_VECTOR_DEFAULT: u16 = 0x8000;
+
+    pub fn start_counting_cycles(&self) {
+        self.cycle_counter.set(0)
+    }
+
+    pub fn get_cycle_count(&mut self) -> u8 {
+        self.cycle_counter.get()
+    }
 
     pub fn load_cartridge(cartridge: Cartridge) -> Self {
         let mut memory = vec![0xFF; 0x10000].into_boxed_slice(); // Initialize all memory
@@ -41,12 +54,17 @@ impl MemoryBus {
             ram: RAM::new(0x0000, 0x07FF),
             rom: ROM::new(0x8000, 0xFFFF),
             last_read_value: Cell::new(0xFF), // For debugging, it may be wise to randomize this value
+            cycle_counter: Cell::new(0x00),
         }
     }
 
     pub fn read_word(&self, address: u16) -> u16 {
         let low_byte = self.read_byte(address) as u16;
         let high_byte = self.read_byte(address.wrapping_add(1)) as u16;
+
+        // There were two reads
+        self.cycle_counter.set(self.cycle_counter.get() + 2);
+
         (high_byte << 8) | low_byte
     }
 
@@ -62,12 +80,22 @@ impl MemoryBus {
         };
 
         self.last_read_value.set(value);
+
+        // There was one read
+        self.cycle_counter.set(self.cycle_counter.get() + 1);
+
         value
     }
 
     pub fn write(&mut self, address: u16, value: u8) {
         match address {
-            0x0000..=0x1FFF => self.ram.write(&mut self.memory, address, value),
+            0x0000..=0x1FFF => 
+            {
+                self.ram.write(&mut self.memory, address, value);
+                
+                // There was one write
+                self.cycle_counter.set(self.cycle_counter.get() + 1);
+            },
             0x8000..=0xFFFF => {} // ROM is read-only
             _ => {},
         }
