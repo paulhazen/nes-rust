@@ -1,15 +1,16 @@
 
 #[macro_export]
-macro_rules! opcode_entry {
+macro_rules! instruction_metadata_entry {
     ($map:ident, $hex:expr, $mnemonic:ident, $size:expr, $cycles:expr, $mode:ident) => {
         ::paste::paste! {
             $map.insert(
                 $hex as u8,
-                OpCode {
+                crate::cpu::InstructionMetadata {
                     mnemonic: crate::cpu::InstructionMnemonic::$mnemonic,
-                    mode: crate::cpu::AddressingMode::$mode,
+                    addressing_mode: crate::cpu::AddressingMode::$mode,
+                    opcode: $hex,
                     size: $size,
-                    cycles: $cycles,
+                    cycle_count: $cycles,
                     factory: || Box::new(crate::cpu::instructions::[<$mnemonic>]), // Explicit module path
                 },
             );
@@ -24,8 +25,8 @@ macro_rules! define_instruction {
 
         impl crate::cpu::instruction::Instruction for $name {
             #[inline(always)]
-            fn execute(&self, cpu: &mut CPU, opcode: &crate::cpu::opcode::OpCode, memory: &mut crate::memory::MemoryBus) {
-                let value =  match opcode.mode {
+            fn execute(&self, cpu: &mut CPU, opcode: &crate::cpu::InstructionMetadata, memory: &mut crate::memory::MemoryBus) {
+                let value =  match opcode.addressing_mode {
                     crate::cpu::AddressingMode::Relative => cpu.fetch_relative(memory),
                     crate::cpu::AddressingMode::Immediate => cpu.fetch_immediate(memory),
                     crate::cpu::AddressingMode::ZeroPage  => cpu.fetch_zero_page(memory),

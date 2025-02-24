@@ -1,8 +1,8 @@
 use crate::cpu::instruction::Instruction;
-use crate::cpu::opcode::OpCodeExecutor;
+use crate::cpu::instruction_executor::InstructionExecutor;
 use crate::cpu::AddressingMode;
 use crate::memory::MemoryBus;
-use super::opcode::OpCode;
+use super::instruction_metadata::InstructionMetadata;
 use super::opcode_table::OPCODE_TABLE;
 use super::Status;
 
@@ -13,7 +13,7 @@ pub struct CPU {
     pc: u16,             
     s: u8,
     p: u8,
-    current_opcode: Option<OpCode>,
+    current_instruction: Option<InstructionMetadata>,
 }
 
 impl CPU {
@@ -25,7 +25,7 @@ impl CPU {
             pc: 0x8000, // NES program entry point
             s: 0xFD,
             p: Status::UNUSED.bits(),
-            current_opcode: None,
+            current_instruction: None,
         }
     }
 
@@ -107,12 +107,12 @@ impl CPU {
 
     // region: Setter / Getter methods
 
-    pub fn set_current_opcode(&mut self, opcode: OpCode) {
-        self.current_opcode = Some(opcode);
+    pub fn set_current_opcode(&mut self, opcode: InstructionMetadata) {
+        self.current_instruction = Some(opcode);
     }
 
-    pub fn get_current_opcode(&self) -> Option<&OpCode> {
-        self.current_opcode.as_ref()
+    pub fn get_current_opcode(&self) -> Option<&InstructionMetadata> {
+        self.current_instruction.as_ref()
     }
 
     pub fn get_s(&self) -> u8 {
@@ -183,7 +183,7 @@ impl CPU {
     pub fn dbg_view_opcode_table(&self) {
         println!("=== START OPCODE_TABLE ===");
         for (key, value) in OPCODE_TABLE.iter() {
-            println!("{0:>3}   {1:#?}   ({3} bytes {4} cycles); Mode: {2:#?}", key, value.mnemonic, value.mode, value.size, value.cycles);
+            println!("{0:>3}   {1:#?}   ({3} bytes {4} cycles); Mode: {2:#?}", key, value.mnemonic, value.addressing_mode, value.size, value.cycle_count);
         }        
         println!("===  END OPCODE_TABLE  ===")
     }
@@ -197,7 +197,7 @@ impl CPU {
      * Executes the given op code executor.
      */
     #[inline(always)]
-    pub fn execute_instruction<T: Instruction>(&mut self, executor: OpCodeExecutor<T>, memory: &mut MemoryBus) {
+    pub fn execute_instruction<T: Instruction>(&mut self, executor: InstructionExecutor<T>, memory: &mut MemoryBus) {
         executor.execute(self, memory);
     }
 
