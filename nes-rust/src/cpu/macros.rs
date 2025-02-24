@@ -19,13 +19,26 @@ macro_rules! instruction_metadata_entry {
 }
 
 #[macro_export]
+macro_rules! create_execute_function {
+    ($execute_fn:expr) => {
+        |cpu: &mut CPU, bus: &mut crate::memory::MemoryBus, operand: u8| {
+            $execute_fn(cpu, bus, operand.into())
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! define_instruction {
     ($name:ident, $execute_fn:expr) => {
         pub struct $name;
 
         impl crate::cpu::instruction::Instruction for $name {
             #[inline(always)]
-            fn execute(&self, cpu: &mut CPU, opcode: &crate::cpu::InstructionMetadata, memory: &mut crate::memory::MemoryBus) {
+            fn execute(&self, cpu: &mut CPU, opcode: &crate::cpu::InstructionMetadata, memory: &mut crate::memory::MemoryBus) -> u8 {
+
+                let execute_function: fn(&mut CPU, &mut crate::memory::MemoryBus, u8) = 
+                    crate::create_execute_function!($execute_fn);
+
                 let value =  match opcode.addressing_mode {
                     crate::cpu::AddressingMode::Relative => cpu.fetch_relative(memory),
                     crate::cpu::AddressingMode::Immediate => cpu.fetch_immediate(memory),
@@ -42,8 +55,20 @@ macro_rules! define_instruction {
                     crate::cpu::AddressingMode::Accumulator => cpu.get_a(),
                 };
                 
+                // Reset, and start counting cycles that may occur during execute function
+                memory.start_counting_cycles();
 
-                $execute_fn(cpu, memory, value.try_into().unwrap());
+                execute_function(cpu, memory, value.try_into().unwrap());
+
+                // Retrieve the number of cycles that the memory bus recorded
+                let measured_cycles = memory.get_cycle_count();
+
+                // Get the number of base cycles that the instruction is supposed to take
+                let base_cycles = opcode.cycle_count;
+
+                // TODO: Inspect circumstances where measured_cycles != base_cycles.
+
+                measured_cycles
             }
         }
     };
