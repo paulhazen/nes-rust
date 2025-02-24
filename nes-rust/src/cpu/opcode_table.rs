@@ -1,10 +1,10 @@
 
 use std::collections::HashMap;
 use once_cell::sync::Lazy;
-use crate::opcode_entry;
-use crate::cpu::opcode::OpCode;
+use crate::instruction_metadata_entry;
+use crate::cpu::InstructionMetadata;
 
-pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
+pub static OPCODE_TABLE : Lazy<HashMap<u8, InstructionMetadata>> = Lazy::new(|| {
     let mut map = HashMap::new();
 
     // region: Opcodes
@@ -18,14 +18,14 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         together with the carry bit. If overflow occurs the carry bit is set, this 
         enables multiple byte addition to be performed.
     */
-    opcode_entry!(map,     0x69,      ADC,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0x65,      ADC,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x75,      ADC,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0x6D,      ADC,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0x7D,      ADC,      3,      4,       AbsoluteX   ); // +1 if page crossed
-    opcode_entry!(map,     0x79,      ADC,      3,      4,       AbsoluteY   ); // +1 if page crossed
-    opcode_entry!(map,     0x61,      ADC,      2,      6,       IndirectX   ); 
-    opcode_entry!(map,     0x71,      ADC,      2,      5,       IndirectY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x69,      ADC,      2,      2,       Immediate   ); 
+    instruction_metadata_entry!(map,     0x65,      ADC,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0x75,      ADC,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0x6D,      ADC,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0x7D,      ADC,      3,      4,       AbsoluteX   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x79,      ADC,      3,      4,       AbsoluteY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x61,      ADC,      2,      6,       IndirectX   ); 
+    instruction_metadata_entry!(map,     0x71,      ADC,      2,      5,       IndirectY   ); // +1 if page crossed
 
     /*
         AND - Logical AN
@@ -35,14 +35,14 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         A logical AND is performed, bit by bit, on the accumulator contents
             using the contents of a byte of memory.
     */
-    opcode_entry!(map,     0x29,      AND,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0x25,      AND,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x35,      AND,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0x2D,      AND,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0x3D,      AND,      3,      4,       AbsoluteX   ); // +1 if page crossed
-    opcode_entry!(map,     0x39,      AND,      3,      4,       AbsoluteY   ); // +1 if page crossed
-    opcode_entry!(map,     0x21,      AND,      2,      6,       IndirectX   ); 
-    opcode_entry!(map,     0x31,      AND,      2,      5,       IndirectY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x29,      AND,      2,      2,       Immediate   ); 
+    instruction_metadata_entry!(map,     0x25,      AND,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0x35,      AND,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0x2D,      AND,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0x3D,      AND,      3,      4,       AbsoluteX   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x39,      AND,      3,      4,       AbsoluteY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x21,      AND,      2,      6,       IndirectX   ); 
+    instruction_metadata_entry!(map,     0x31,      AND,      2,      5,       IndirectY   ); // +1 if page crossed
 
     /*
         ASL - Arithmetic Shift Lef
@@ -82,7 +82,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         If the zero flag is set then add the relative displacement to the 
         program counter to cause a branch to a new location.
     */
-    opcode_entry!(map,     0xF0,      BEQ,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    instruction_metadata_entry!(map,     0xF0,      BEQ,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     /*
         BIT - Bit Test
@@ -94,8 +94,8 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         in memory to set or clear the zero flag, but the result is not kept. 
         Bits 7 and 6 of the value from memory are copied into the N and V flags.
     */
-    opcode_entry!(map,     0x24,      BIT,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x2C,      BIT,      3,      4,       Absolute    );
+    instruction_metadata_entry!(map,     0x24,      BIT,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0x2C,      BIT,      3,      4,       Absolute    );
 
     /*
         BMI - Branch if Minus
@@ -119,7 +119,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         If the negative flag is clear then add the relative displacement to the
         program counter to cause a branch to a new location.
     */
-    opcode_entry!(map,     0x10,      BPL,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
+    instruction_metadata_entry!(map,     0x10,      BPL,      2,      2,       Relative    ); // +1 cycles if branch succeeds +2 if to a new page
 
     /*
         BRK - Force Interrupt
@@ -154,7 +154,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
 
         Set the carry flag to zero.
     */
-    opcode_entry!(map,     0x18,      CLC,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0x18,      CLC,      1,      2,       Implied     ); 
 
     /*
         CLD - Clear Decimal Mode
@@ -163,7 +163,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
 
         Sets the decimal mode flag to zero.
     */
-    opcode_entry!(map,     0xD8,      CLD,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0xD8,      CLD,      1,      2,       Implied     ); 
 
     /*
         CLI - Clear Interrupt Disable
@@ -173,7 +173,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Clears the interrupt disable flag allowing normal interrupt requests to
         be serviced.
     */
-    opcode_entry!(map,     0x58,      CLI,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0x58,      CLI,      1,      2,       Implied     ); 
 
     /*
         CLV - Clear Overflow Flag
@@ -181,7 +181,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         V = 0
         Clears the overflow flag.
     */
-    opcode_entry!(map,     0xB8,      CLV,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0xB8,      CLV,      1,      2,       Implied     ); 
 
     /*
         CMP - Compare
@@ -191,14 +191,14 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         This instruction compares the contents of the accumulator with another
         memory held value and sets the zero and carry flags as appropriate.
     */
-    opcode_entry!(map,     0xC9,      CMP,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0xC5,      CMP,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0xD5,      CMP,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0xCD,      CMP,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0xDD,      CMP,      3,      4,       AbsoluteX   ); // +1 if page crossed
-    opcode_entry!(map,     0xD9,      CMP,      3,      4,       AbsoluteY   ); // +1 if page crossed
-    opcode_entry!(map,     0xC1,      CMP,      2,      6,       IndirectX   ); 
-    opcode_entry!(map,     0xD1,      CMP,      2,      5,       IndirectY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0xC9,      CMP,      2,      2,       Immediate   ); 
+    instruction_metadata_entry!(map,     0xC5,      CMP,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0xD5,      CMP,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0xCD,      CMP,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0xDD,      CMP,      3,      4,       AbsoluteX   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0xD9,      CMP,      3,      4,       AbsoluteY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0xC1,      CMP,      2,      6,       IndirectX   ); 
+    instruction_metadata_entry!(map,     0xD1,      CMP,      2,      5,       IndirectY   ); // +1 if page crossed
 
     /*
         CPX - Compare X Register
@@ -245,7 +245,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Subtracts one from the X register setting the zero and negative flags 
         as appropriate.
     */
-    opcode_entry!(map,     0xCA,      DEX,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0xCA,      DEX,      1,      2,       Implied     ); 
 
     /*
         DEY - Decrement Y Registe
@@ -255,7 +255,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Subtracts one from the Y register setting the zero and negative flags 
         as appropriate.
     */
-    opcode_entry!(map,     0x88,      DEY,      1,      2,       Implied     );
+    instruction_metadata_entry!(map,     0x88,      DEY,      1,      2,       Implied     );
 
     /*
         EOR - Exclusive O
@@ -265,14 +265,14 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         An exclusive OR is performed, bit by bit, on the accumulator contents 
         using the contents of a byte of memory.
     */
-    opcode_entry!(map,     0x49,      EOR,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0x45,      EOR,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x55,      EOR,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0x4D,      EOR,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0x5D,      EOR,      3,      4,       AbsoluteX   ); // +1 if page crossed
-    opcode_entry!(map,     0x59,      EOR,      3,      4,       AbsoluteY   ); // +1 if page crossed
-    opcode_entry!(map,     0x41,      EOR,      2,      6,       IndirectX   ); 
-    opcode_entry!(map,     0x51,      EOR,      2,      5,       IndirectY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x49,      EOR,      2,      2,       Immediate   ); 
+    instruction_metadata_entry!(map,     0x45,      EOR,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0x55,      EOR,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0x4D,      EOR,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0x5D,      EOR,      3,      4,       AbsoluteX   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x59,      EOR,      3,      4,       AbsoluteY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x41,      EOR,      2,      6,       IndirectX   ); 
+    instruction_metadata_entry!(map,     0x51,      EOR,      2,      5,       IndirectY   ); // +1 if page crossed
 
     /*
         INC - Increment Memory
@@ -295,7 +295,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Adds one to the X register setting the zero and negative flags as 
         appropriate.
     */
-    opcode_entry!(map,     0xE8,      INX,      1,      2,       Implied     );
+    instruction_metadata_entry!(map,     0xE8,      INX,      1,      2,       Implied     );
 
     /*
         INY - Increment Y Register
@@ -305,7 +305,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Adds one to the Y register setting the zero and negative flags as 
         appropriate.
     */
-    opcode_entry!(map,     0xC8,      INY,      1,      2,       Implied     );
+    instruction_metadata_entry!(map,     0xC8,      INY,      1,      2,       Implied     );
 
     /*
         JMP - Jump
@@ -322,7 +322,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         point on to the stack and then sets the program counter to the target 
         memory address.
     */
-    opcode_entry!(map,     0x20,      JSR,      3,      6,       Absolute    ); 
+    instruction_metadata_entry!(map,     0x20,      JSR,      3,      6,       Absolute    ); 
 
     /*
         LDA - Load Accumulator
@@ -332,14 +332,14 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Loads a byte of memory into the accumulator setting the zero and 
         negative flags as appropriate.
     */
-    opcode_entry!(map,     0xA9,      LDA,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0xA5,      LDA,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0xB5,      LDA,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0xAD,      LDA,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0xBD,      LDA,      3,      4,       AbsoluteX   ); // +1 if page crossed
-    opcode_entry!(map,     0xB9,      LDA,      3,      4,       AbsoluteY   ); // +1 if page crossed
-    opcode_entry!(map,     0xA1,      LDA,      2,      6,       IndirectX   ); 
-    opcode_entry!(map,     0xB1,      LDA,      2,      5,       IndirectY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0xA9,      LDA,      2,      2,       Immediate   ); 
+    instruction_metadata_entry!(map,     0xA5,      LDA,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0xB5,      LDA,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0xAD,      LDA,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0xBD,      LDA,      3,      4,       AbsoluteX   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0xB9,      LDA,      3,      4,       AbsoluteY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0xA1,      LDA,      2,      6,       IndirectX   ); 
+    instruction_metadata_entry!(map,     0xB1,      LDA,      2,      5,       IndirectY   ); // +1 if page crossed
 
     /*
         LDX - Load X Register
@@ -349,11 +349,11 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Loads a byte of memory into the X register setting the zero and 
         negative flags as appropriate.
     */
-    opcode_entry!(map,     0xA2,      LDX,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0xA6,      LDX,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0xB6,      LDX,      2,      4,       ZeroPageY   ); 
-    opcode_entry!(map,     0xAE,      LDX,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0xBE,      LDX,      3,      4,       AbsoluteY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0xA2,      LDX,      2,      2,       Immediate   ); 
+    instruction_metadata_entry!(map,     0xA6,      LDX,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0xB6,      LDX,      2,      4,       ZeroPageY   ); 
+    instruction_metadata_entry!(map,     0xAE,      LDX,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0xBE,      LDX,      3,      4,       AbsoluteY   ); // +1 if page crossed
 
     /*
         LDY - Load Y Register
@@ -363,11 +363,11 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Loads a byte of memory into the Y register setting the zero and 
         negative flags as appropriate.
     */
-    opcode_entry!(map,     0xA0,      LDY,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0xA4,      LDY,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0xB4,      LDY,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0xAC,      LDY,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0xBC,      LDY,      3,      4,       AbsoluteX   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0xA0,      LDY,      2,      2,       Immediate   ); 
+    instruction_metadata_entry!(map,     0xA4,      LDY,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0xB4,      LDY,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0xAC,      LDY,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0xBC,      LDY,      3,      4,       AbsoluteX   ); // +1 if page crossed
 
     /*
         LSR - Logical Shift Right
@@ -389,7 +389,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         The NOP instruction causes no changes to the processor other than the
         normal incrementing of the program counter to the next instruction.
     */
-    opcode_entry!(map,     0xEA,      NOP,      1,      2,       Implied     );
+    instruction_metadata_entry!(map,     0xEA,      NOP,      1,      2,       Implied     );
 
     /*
         ORA - Logical Inclusive O
@@ -399,14 +399,14 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         An inclusive OR is performed, bit by bit, on the accumulator contents
         using the contents of a byte of memory.
     */
-    opcode_entry!(map,     0x09,      ORA,      2,      2,       Immediate   ); 
-    opcode_entry!(map,     0x05,      ORA,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x15,      ORA,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0x0D,      ORA,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0x1D,      ORA,      3,      4,       AbsoluteX   ); // +1 if page crossed
-    opcode_entry!(map,     0x19,      ORA,      3,      4,       AbsoluteY   ); // +1 if page crossed
-    opcode_entry!(map,     0x01,      ORA,      2,      6,       IndirectX   ); 
-    opcode_entry!(map,     0x11,      ORA,      2,      5,       IndirectY   ); // +1 if page crosse
+    instruction_metadata_entry!(map,     0x09,      ORA,      2,      2,       Immediate   ); 
+    instruction_metadata_entry!(map,     0x05,      ORA,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0x15,      ORA,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0x0D,      ORA,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0x1D,      ORA,      3,      4,       AbsoluteX   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x19,      ORA,      3,      4,       AbsoluteY   ); // +1 if page crossed
+    instruction_metadata_entry!(map,     0x01,      ORA,      2,      6,       IndirectX   ); 
+    instruction_metadata_entry!(map,     0x11,      ORA,      2,      5,       IndirectY   ); // +1 if page crosse
 
     /*
         PHA - Push Accumulator
@@ -478,7 +478,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         The RTS instruction is used at the end of a subroutine to return to the
         calling routine. It pulls the program counter (minus one) from the stack.
     */
-    opcode_entry!(map,     0x60,      RTS,      1,      6,       Implied     );
+    instruction_metadata_entry!(map,     0x60,      RTS,      1,      6,       Implied     );
 
     /*
         SBC - Subtract with Carry
@@ -524,7 +524,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
 
         Set the interrupt disable flag to one.
     */
-    opcode_entry!(map,     0x78,      SEI,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0x78,      SEI,      1,      2,       Implied     ); 
 
     /*
         STA - Store Accumulator
@@ -533,13 +533,13 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
 
         Stores the contents of the accumulator into memory.
     */
-    opcode_entry!(map,     0x85,      STA,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x95,      STA,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0x8D,      STA,      3,      4,       Absolute    ); 
-    opcode_entry!(map,     0x9D,      STA,      3,      5,       AbsoluteX   ); 
-    opcode_entry!(map,     0x99,      STA,      3,      5,       AbsoluteY   ); 
-    opcode_entry!(map,     0x81,      STA,      2,      6,       IndirectX   ); 
-    opcode_entry!(map,     0x91,      STA,      2,      6,       IndirectY   ); 
+    instruction_metadata_entry!(map,     0x85,      STA,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0x95,      STA,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0x8D,      STA,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0x9D,      STA,      3,      5,       AbsoluteX   ); 
+    instruction_metadata_entry!(map,     0x99,      STA,      3,      5,       AbsoluteY   ); 
+    instruction_metadata_entry!(map,     0x81,      STA,      2,      6,       IndirectX   ); 
+    instruction_metadata_entry!(map,     0x91,      STA,      2,      6,       IndirectY   ); 
 
     /*
         STX - Store X Register
@@ -548,9 +548,9 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
 
         Stores the contents of the X register into memory.
     */
-    opcode_entry!(map,     0x86,      STX,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x96,      STX,      2,      4,       ZeroPageY   ); 
-    opcode_entry!(map,     0x8E,      STX,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0x86,      STX,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0x96,      STX,      2,      4,       ZeroPageY   ); 
+    instruction_metadata_entry!(map,     0x8E,      STX,      3,      4,       Absolute    ); 
 
     /*
         STY - Store Y Register
@@ -559,9 +559,9 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
 
         Stores the contents of the Y register into memory.
     */
-    opcode_entry!(map,     0x84,      STY,      2,      3,       ZeroPage    ); 
-    opcode_entry!(map,     0x94,      STY,      2,      4,       ZeroPageX   ); 
-    opcode_entry!(map,     0x8C,      STY,      3,      4,       Absolute    ); 
+    instruction_metadata_entry!(map,     0x84,      STY,      2,      3,       ZeroPage    ); 
+    instruction_metadata_entry!(map,     0x94,      STY,      2,      4,       ZeroPageX   ); 
+    instruction_metadata_entry!(map,     0x8C,      STY,      3,      4,       Absolute    ); 
 
     /*
         TAX - Transfer Accumulator to x
@@ -571,7 +571,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Copies the current contents of the accumulator into the X register and 
         sets the zero and negative flags as appropriate.
     */
-    opcode_entry!(map,     0xAA,      TAX,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0xAA,      TAX,      1,      2,       Implied     ); 
 
     /*
         TAY - Transfer Accumulator to y
@@ -581,7 +581,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Copies the current contents of the accumulator into the Y register and 
         sets the zero and negative flags as appropriate.
     */
-    opcode_entry!(map,     0xA8,      TAY,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0xA8,      TAY,      1,      2,       Implied     ); 
 
     /*
         TSX - Transfer Stack Pointer to x
@@ -591,7 +591,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Copies the current contents of the stack register into the X register and 
         sets the zero and negative flags as appropriate.
     */
-    opcode_entry!(map,     0xBA,      TSX,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0xBA,      TSX,      1,      2,       Implied     ); 
 
     /*
         TXA - Transfer X to Accumulator
@@ -601,7 +601,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Copies the current contents of the X register into the accumulator and 
         sets the zero and negative flags as appropriate.
     */
-    opcode_entry!(map,     0x8A,      TXA,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0x8A,      TXA,      1,      2,       Implied     ); 
 
     /*
         TXS - Transfer X to Stack Pointer
@@ -610,7 +610,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
 
         Copies the current contents of the X register into the stack register.
     */
-    opcode_entry!(map,     0x9A,      TXS,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0x9A,      TXS,      1,      2,       Implied     ); 
 
     /*
         TYA - Transfer Y to Accumulator
@@ -620,7 +620,7 @@ pub static OPCODE_TABLE : Lazy<HashMap<u8, OpCode>> = Lazy::new(|| {
         Copies the current contents of the Y register into the accumulator and
         sets the zero and negative flags as appropriate.
     */
-    opcode_entry!(map,     0x98,      TYA,      1,      2,       Implied     ); 
+    instruction_metadata_entry!(map,     0x98,      TYA,      1,      2,       Implied     ); 
 
     // endregion: Opcodes
 
