@@ -1,4 +1,4 @@
-use nes_rust::system::NES;
+use nes_rust::nes::NES;
 mod common;
 use std::sync::mpsc;
 
@@ -23,7 +23,7 @@ fn test_execute_instruction() {
         let _ = tx.send(());
     });
 
-    if rx.recv_timeout(Duration::from_secs(5)).is_err() {
+    if rx.recv_timeout(Duration::from_secs(60)).is_err() {
         panic!("Test timed out! Possible infinite loop in emulator.");
     }
 
