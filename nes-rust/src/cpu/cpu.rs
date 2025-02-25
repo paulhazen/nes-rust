@@ -81,9 +81,9 @@ impl CPU {
         }
     }    
 
-    pub fn step(&mut self, memory: &mut MemoryBus) {
+    pub fn tick(&mut self, memory: &mut MemoryBus) -> u8 {
         let opcode = self.fetch_byte(memory);
-        self.execute(opcode, memory);
+        self.execute(opcode, memory)
     }
 
     pub fn pull_stack(&mut self, memory: &MemoryBus) -> u8 {
@@ -165,19 +165,20 @@ impl CPU {
     
     // endregion: Accessor methods
 
-    pub fn execute(&mut self, opcode: u8, memory: &mut MemoryBus) {
-        if let Some(instruction) = OPCODE_TABLE.get(&opcode) {
+    pub fn execute(&mut self, opcode: u8, memory: &mut MemoryBus) -> u8 {
+        let executed_cycles = if let Some(instruction) = OPCODE_TABLE.get(&opcode) {
             
             self.set_current_opcode(instruction.clone());
 
             let test = (instruction.factory)();
 
-            println!("{0:#?} {1:#x}", instruction.mnemonic, opcode);
-
-            test.execute(self, instruction, memory);
+            test.execute(self, instruction, memory)
         } else {
             //println!("Could not find instruction for opcode \"{:#x}\".", opcode);
-        }
+            0
+        };
+
+        executed_cycles
     }
 
     pub fn dbg_view_opcode_table(&self) {

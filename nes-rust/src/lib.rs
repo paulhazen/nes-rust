@@ -1,5 +1,7 @@
 pub mod cpu;
+pub mod ppu;
 pub mod memory;
 pub mod macros;
 pub mod cartridge;
-pub mod system;
+pub mod nes;
+pub mod framebuffer_viewer;

@@ -67,8 +67,11 @@ macro_rules! define_instruction {
                 let base_cycles = opcode.cycle_count;
 
                 // TODO: Inspect circumstances where measured_cycles != base_cycles.
+                //if base_cycles != measured_cycles {
+                //    println!("Cycle count difference: {}", base_cycles.abs_diff(measured_cycles));
+                //}
 
-                measured_cycles
+                base_cycles
             }
         }
     };
