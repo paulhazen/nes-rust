@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Rust",
+            "program": "${workspaceFolder}/nes-rust/target/debug/YOUR_EXECUTABLE_NAME",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "cargo build",
+            "sourceLanguages": ["rust"],
+            "initCommands": [
+                "settings set target.process.experimental-lazy-async-frame-pop true"
+            ]
+        }
+    ]
+}

@@ -5,12 +5,16 @@ use crate::ppu::PPU;
 use crate::memory::MemoryBus;
 use crate::cartridge::Cartridge;
 use crate::framebuffer_viewer::FramebufferViewer;
-use rand::Rng;
+use crate::memory::CPUBus;
 use std::thread;
+use crate::memory::Bus;
 
 pub struct NES {
+
     pub cpu: CPU,
     pub ppu: PPU,
+
+    pub cpu_bus: CPUBus,
     pub memory_bus: MemoryBus,
     pub viewer: FramebufferViewer,
 }
@@ -19,13 +23,20 @@ impl NES {
     pub fn open_rom(rom_filepath: &str) -> Self {
         let cartridge = Cartridge::load_from_file(rom_filepath).unwrap();
         let memory_bus = MemoryBus::load_cartridge(cartridge.clone());
+        let cpu_bus = CPUBus::load_cartridge(cartridge.clone());
         let cpu = CPU::new();
         let ppu = PPU::load_from_cartridge(&cartridge.clone());
         let viewer = FramebufferViewer::new();
 
         cpu.dbg_view_opcode_table();
 
-        Self {cpu, ppu, memory_bus, viewer }
+        Self {
+            cpu, 
+            ppu, 
+            cpu_bus,
+            memory_bus, 
+            viewer 
+        }
     }
 
     pub fn run(&mut self) {
@@ -33,10 +44,7 @@ impl NES {
         // Reset the CPU explicitly before running (TODO: This may not be needed)
         self.cpu.reset(&self.memory_bus);
 
-        // Print the reset vector
-        self.memory_bus.debug_view_reset_vector();
-
-        let mut rng = rand::rng();
+        //let rng = rand::rng();
 
         loop {
             //for pixel in self.ppu.frame_buffer.iter_mut() {
@@ -52,6 +60,10 @@ impl NES {
             self.viewer.update(&self.ppu.frame_buffer);
 
             thread::sleep(Duration::from_millis(16));
+
+            if !self.viewer.is_open() {
+                break
+            }
         }
     }
 }

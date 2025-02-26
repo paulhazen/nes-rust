@@ -12,4 +12,8 @@ minifb = "0.28.0"
 rand = "0.9.0"
 
 [profile.dev]
-opt-level = 0 # Ensure no optimization for debugging
+opt-level = 0            # Ensure no optimizations
+debug = true             # Include debug symbols
+debug-assertions = true  # Keep debug assertions
+overflow-checks = true   # Keep overflow checks
+
