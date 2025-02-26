@@ -1,3 +1,4 @@
+use crate::cartridge::Cartridge;
 use crate::memory::memory_view::MemoryView;
 use crate::memory::MemoryBus;
 
@@ -13,6 +14,7 @@ impl ROM {
 }
 
 impl MemoryView for ROM {
+
     fn write(&mut self, _memory: &mut [u8], _address:u16, _value: u8) {
         // TODO: Probably panic here - ROM should never be written to.
     }

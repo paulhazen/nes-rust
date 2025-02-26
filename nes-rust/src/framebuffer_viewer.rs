@@ -24,6 +24,10 @@ impl FramebufferViewer {
         Self { window }
     }
 
+    pub fn is_open(&self) -> bool {
+        return self.window.is_open()
+    }
+
     pub fn update(&mut self, framebuffer: &[u8; WIDTH * HEIGHT]) {
         // Convert NES framebuffer (grayscale 0-3) to RGB u32
         let buffer: Vec<u32> = framebuffer.iter().map(|&color| Self::convert_to_rgb(color)).collect();

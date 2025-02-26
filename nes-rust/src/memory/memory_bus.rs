@@ -1,6 +1,6 @@
 use super::ram::RAM;
 use super::rom::ROM;
-use crate::cartridge::{Cartridge};
+use crate::cartridge::Cartridge;
 use crate::memory::memory_view::MemoryView;
 use std::cell::Cell;
 
