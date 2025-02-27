@@ -12,6 +12,7 @@ pub struct InstructionMetadata {
     pub cycle_count: u8,
     pub addressing_mode: AddressingMode,
     pub factory: InstructionFactory,
+<<<<<<< HEAD
 }
 
 impl InstructionMetadata {
@@ -21,4 +22,6 @@ impl InstructionMetadata {
             self.mnemonic, self.opcode, self.size, self.cycle_count, self.addressing_mode, self.factory
         );
     }
+=======
+>>>>>>> ac64b2fa59787330904af5315794eab496bbd747
 }

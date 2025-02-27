@@ -58,10 +58,13 @@ macro_rules! define_instruction {
                 
                 // Reset, and start counting cycles that may occur during execute function
                 memory.set_cycle_counter(0);
+<<<<<<< HEAD
 
                 // Print the instruction metadata
                 opcode.debug_instruction_metadata();
 
+=======
+>>>>>>> ac64b2fa59787330904af5315794eab496bbd747
                 execute_function(cpu, memory, value.try_into().unwrap());
 
                 // Retrieve the number of cycles that the memory bus recorded
