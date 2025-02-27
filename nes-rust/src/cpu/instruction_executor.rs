@@ -1,6 +1,6 @@
 use crate::cpu::instruction::Instruction;
 use crate::cpu::CPU;
-use crate::memory::MemoryBus;
+use crate::memory::CPUBus;
 
 use super::instruction_metadata::InstructionMetadata;
 
@@ -14,7 +14,7 @@ impl<T: Instruction> InstructionExecutor<T> {
         Self {instruction_metadata: opcode, executor }
     }
 
-    pub fn execute(&self, cpu: &mut CPU, memory: &mut MemoryBus) {
+    pub fn execute(&self, cpu: &mut CPU, memory: &mut CPUBus) {
         self.executor.execute(cpu, &self.instruction_metadata, memory);
     }
 }

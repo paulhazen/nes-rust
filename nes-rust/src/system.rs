@@ -1,16 +1,17 @@
 use crate::cpu::CPU;
-use crate::memory::MemoryBus;
+use crate::memory::Bus;
+use crate::memory::CPUBus;
 use crate::cartridge::Cartridge;
 
 pub struct NES {
     pub cpu: CPU,
-    pub memory_bus: MemoryBus,
+    pub memory_bus: CPUBus,
 }
 
 impl NES {
     pub fn open_rom(rom_filepath: &str) -> Self {
         let cartridge = Cartridge::load_from_file(rom_filepath).unwrap();
-        let memory_bus = MemoryBus::load_cartridge(cartridge);
+        let memory_bus = CPUBus::load_cartridge(cartridge);
         let cpu = CPU::new();
 
         cpu.dbg_view_opcode_table();
@@ -22,9 +23,6 @@ impl NES {
 
         // Reset the CPU explicitly before running (TODO: This may not be needed)
         self.cpu.reset(&self.memory_bus);
-
-        // Print the reset vector
-        self.memory_bus.debug_view_reset_vector();
 
         loop {
             self.cpu.step(&mut self.memory_bus);

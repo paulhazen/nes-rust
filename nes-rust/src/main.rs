@@ -2,7 +2,6 @@ pub mod cpu;
 pub mod memory;
 pub mod macros;
 
-pub use memory::MemoryBus;
 pub use cpu::CPU;
 use nes_rust::{cartridge::{self}, system::NES};
 

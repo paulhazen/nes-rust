@@ -1,5 +1,6 @@
 use crate::cpu::CPU;
 use crate::cpu::Status;
+use crate::memory::Bus;
 use crate::define_instruction;
 
 define_instruction!(CLC, |cpu: &mut CPU, _, _: u8| {

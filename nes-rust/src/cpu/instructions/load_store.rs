@@ -1,7 +1,8 @@
 // LDA, LDX, LDY, STA, STX, STY
 
 use crate::cpu::CPU;
-use crate::memory::MemoryBus;
+use crate::memory::CPUBus;
+use crate::memory::Bus;
 use crate::define_instruction;
 
 define_instruction!(LDA, |cpu: &mut CPU, _, value| {
@@ -17,14 +18,14 @@ define_instruction!(LDY, |cpu: &mut CPU, _, value| {
     cpu.set_y(value);
 });
 
-define_instruction!(STA, |cpu: &mut CPU, memory: &mut MemoryBus, address : u16| {
-    memory.write(address, cpu.get_a());
+define_instruction!(STA, |cpu: &mut CPU, memory: &mut CPUBus, address : u16| {
+    memory.write_byte(address, cpu.get_a());
 });
 
-define_instruction!(STX, |cpu: &mut CPU, memory: &mut MemoryBus, address : u16| {
-    memory.write(address, cpu.get_x());
+define_instruction!(STX, |cpu: &mut CPU, memory: &mut CPUBus, address : u16| {
+    memory.write_byte(address, cpu.get_x());
 });
 
-define_instruction!(STY, |cpu: &mut CPU, memory: &mut MemoryBus, address : u16| {
-    memory.write(address, cpu.get_y());
+define_instruction!(STY, |cpu: &mut CPU, memory: &mut CPUBus, address : u16| {
+    memory.write_byte(address, cpu.get_y());
 });

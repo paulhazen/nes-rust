@@ -7,7 +7,7 @@ pub trait Bus {
 
     fn writeable_ranges() -> &'static [Range<u16>];
 
-    fn mirror_mask() -> &'static Option<u16>;
+    fn mirror_mask() -> u16;
 
     fn load_cartridge(cartridge: Cartridge) -> Self;
 
@@ -22,21 +22,22 @@ pub trait Bus {
         return true;
     }
 
-    fn read_word(&mut self, address: u16) -> u16 {
+    fn read_word(&self, address: u16) -> u16 {
         let low_byte = self.read_byte(address) as u16;
         let high_byte = self.read_byte(address.wrapping_add(1)) as u16;
 
         (high_byte << 8) | low_byte
     }
 
-    fn read_byte(&mut self, address: u16) -> u8 {
+    fn read_byte(&self, address: u16) -> u8 {
+        let masked_address = address & Self::mirror_mask();
         // Implement open-bus behavior - where invalid reads return the last
         // byte that was successfully read.
-        if !self.is_readable(address) {
+        if !self.is_readable(masked_address) {
             self.get_last_read_value();
         }
 
-        let value = self.memory()[address as usize];
+        let value = self.memory()[masked_address as usize];
         self.increment_cycle_counter();
 
         self.set_last_read_value(value);

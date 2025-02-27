@@ -1,7 +1,8 @@
 use crate::cpu::instruction::Instruction;
 use crate::cpu::instruction_executor::InstructionExecutor;
 use crate::cpu::AddressingMode;
-use crate::memory::MemoryBus;
+use crate::memory::CPUBus;
+use crate::memory::Bus;
 use super::instruction_metadata::InstructionMetadata;
 use super::opcode_table::OPCODE_TABLE;
 use super::Status;
@@ -45,7 +46,7 @@ impl CPU {
 
     // endregion: Functions to utilize the status register within the CPU
 
-    pub fn get_effective_address(&self, addressing_mode: AddressingMode, memory: &MemoryBus) -> u16 {
+    pub fn get_effective_address(&self, addressing_mode: AddressingMode, memory: &CPUBus) -> u16 {
         match addressing_mode {
             AddressingMode::Immediate => self.pc, // PC points to operand
             AddressingMode::ZeroPage => memory.read_byte(self.pc) as u16,
@@ -81,12 +82,12 @@ impl CPU {
         }
     }    
 
-    pub fn step(&mut self, memory: &mut MemoryBus) {
+    pub fn step(&mut self, memory: &mut CPUBus) {
         let opcode = self.fetch_byte(memory);
         self.execute(opcode, memory);
     }
 
-    pub fn pull_stack(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn pull_stack(&mut self, memory: &CPUBus) -> u8 {
         // Stack is located at $0100–$01FF, so we add 0x100 to the stack pointer
         let address = 0x0100 | self.get_s() as u16;
 
@@ -99,9 +100,9 @@ impl CPU {
         value
     }
     
-    pub fn push_stack(&mut self, memory: &mut MemoryBus, value: u8) {
+    pub fn push_stack(&mut self, memory: &mut CPUBus, value: u8) {
         let stack_address = 0x0100 | (self.s as u16); // Stack is at $0100 - $01FF
-        memory.write(stack_address, value);  // Store value in memory
+        memory.write_byte(stack_address, value);  // Store value in memory
         self.s = self.s.wrapping_sub(1); // Decrement SP
     }
 
@@ -155,7 +156,7 @@ impl CPU {
         self.y = value;
     }
 
-    pub fn branch(&mut self, _: &mut MemoryBus, condition: bool, offset: u8) {
+    pub fn branch(&mut self, _: &mut CPUBus, condition: bool, offset: u8) {
         if condition {
             let signed_offset = offset as i8 as i16; // Sign-extend the 8-bit offset
             let new_pc = self.get_pc().wrapping_add(signed_offset as u16);
@@ -165,7 +166,7 @@ impl CPU {
     
     // endregion: Accessor methods
 
-    pub fn execute(&mut self, opcode: u8, memory: &mut MemoryBus) {
+    pub fn execute(&mut self, opcode: u8, memory: &mut CPUBus) {
         if let Some(instruction) = OPCODE_TABLE.get(&opcode) {
             
             self.set_current_opcode(instruction.clone());
@@ -197,13 +198,13 @@ impl CPU {
      * Executes the given op code executor.
      */
     #[inline(always)]
-    pub fn execute_instruction<T: Instruction>(&mut self, executor: InstructionExecutor<T>, memory: &mut MemoryBus) {
+    pub fn execute_instruction<T: Instruction>(&mut self, executor: InstructionExecutor<T>, memory: &mut CPUBus) {
         executor.execute(self, memory);
     }
 
-    pub fn reset(&mut self, memory: &MemoryBus) {
-        let low_byte = memory.read_byte(MemoryBus::RESET_VECTOR_ADDR) as u16;
-        let high_byte = memory.read_byte(MemoryBus::RESET_VECTOR_HIGH_ADDR) as u16;
+    pub fn reset(&mut self, memory: &CPUBus) {
+        let low_byte = memory.read_byte(CPUBus::RESET_VECTOR_ADDR) as u16;
+        let high_byte = memory.read_byte(CPUBus::RESET_VECTOR_HIGH_ADDR) as u16;
 
         self.pc = (high_byte << 8) | low_byte;
 
@@ -213,37 +214,37 @@ impl CPU {
 
     // startregion: Fetch functions
 
-    pub fn fetch_relative(&mut self, memory: &mut MemoryBus) -> u8 {
+    pub fn fetch_relative(&mut self, memory: &mut CPUBus) -> u8 {
         return self.fetch_byte(memory);
     }
 
-    pub fn fetch_immediate(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_immediate(&mut self, memory: &CPUBus) -> u8 {
         self.fetch_byte(memory)
     }
 
-    pub fn fetch_zero_page(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_zero_page(&mut self, memory: &CPUBus) -> u8 {
         let address = self.fetch_byte(memory) as u16;
         memory.read_byte(address)
     }
 
-    pub fn fetch_zero_page_x(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_zero_page_x(&mut self, memory: &CPUBus) -> u8 {
         let address = self.fetch_byte(memory).wrapping_add(self.x) as u16;
         memory.read_byte(address)
     }
 
-    pub fn fetch_zero_page_y(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_zero_page_y(&mut self, memory: &CPUBus) -> u8 {
         let address = self.fetch_byte(memory).wrapping_add(self.y) as u16;
         memory.read_byte(address)
     }
 
-    pub fn fetch_absolute(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_absolute(&mut self, memory: &CPUBus) -> u8 {
         let low = self.fetch_byte(memory) as u16;
         let high = self.fetch_byte(memory) as u16;
         let address = (high << 8) | low;
         memory.read_byte(address)
     }
 
-    pub fn fetch_absolute_x(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_absolute_x(&mut self, memory: &CPUBus) -> u8 {
         let low = self.fetch_byte(memory) as u16;
         let high = self.fetch_byte(memory) as u16;
         let base_address = (high << 8) | low;
@@ -251,7 +252,7 @@ impl CPU {
         memory.read_byte(address)
     }
 
-    pub fn fetch_absolute_y(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_absolute_y(&mut self, memory: &CPUBus) -> u8 {
         let low = self.fetch_byte(memory) as u16;
         let high = self.fetch_byte(memory) as u16;
         let base_address = (high << 8) | low;
@@ -259,7 +260,7 @@ impl CPU {
         memory.read_byte(address)
     }
 
-    pub fn fetch_indirect(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_indirect(&mut self, memory: &CPUBus) -> u8 {
         let base_address = self.fetch_word(memory); // Fetch a 16-bit address
     
         // Handle the 6502's infamous indirect jump bug
@@ -271,7 +272,7 @@ impl CPU {
         memory.read_byte(effective_address)
     }    
 
-    pub fn fetch_indirect_x(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_indirect_x(&mut self, memory: &CPUBus) -> u8 {
         let base_address = self.fetch_byte(memory);
         let zero_page_address = base_address.wrapping_add(self.x);
 
@@ -282,7 +283,7 @@ impl CPU {
         memory.read_byte(effective_address)
     }
 
-    pub fn fetch_indirect_y(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_indirect_y(&mut self, memory: &CPUBus) -> u8 {
         let base_address = self.fetch_byte(memory);
 
         let low = memory.read_byte(base_address as u16) as u16;
@@ -293,13 +294,13 @@ impl CPU {
         memory.read_byte(effective_address)
     }
 
-    pub fn fetch_byte(&mut self, memory: &MemoryBus) -> u8 {
+    pub fn fetch_byte(&mut self, memory: &CPUBus) -> u8 {
         let opcode = memory.read_byte(self.pc);
         self.pc = self.pc.wrapping_add(1);
         opcode
     }
 
-    pub fn fetch_word(&mut self, memory: &MemoryBus) -> u16 {
+    pub fn fetch_word(&mut self, memory: &CPUBus) -> u16 {
         let low = memory.read_byte(self.pc) as u16;
         let high = memory.read_byte(self.pc.wrapping_add(1)) as u16;
         self.pc = self.pc.wrapping_add(2);

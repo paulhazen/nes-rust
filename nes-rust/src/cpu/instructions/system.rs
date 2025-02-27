@@ -1,11 +1,12 @@
 use crate::cpu::CPU;
-use crate::memory::MemoryBus;
+use crate::memory::CPUBus;
+use crate::memory::Bus;
 use crate::define_instruction;
 
-define_instruction!(NOP, |_: &mut CPU, _: &mut MemoryBus, _: u8| {});
+define_instruction!(NOP, |_: &mut CPU, _: &mut CPUBus, _: u8| {});
 
 // Break (BRK)
-define_instruction!(BRK, |cpu: &mut CPU, memory: &mut MemoryBus, _: u8| {
+define_instruction!(BRK, |cpu: &mut CPU, memory: &mut CPUBus, _: u8| {
     let pc = cpu.get_pc().wrapping_add(1); // Increment PC to simulate fetching next instruction
     
     // Push PC high and low bytes onto the stack
