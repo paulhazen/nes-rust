@@ -17,8 +17,8 @@ pub struct InstructionMetadata {
 impl InstructionMetadata {
     pub fn debug_instruction_metadata(&self) {
         println!(
-            "[{:?}] Opcode: 0x{:02X}, Size: {}, Cycles: {}, Mode: {:?}, Factory: {:?}",
-            self.mnemonic, self.opcode, self.size, self.cycle_count, self.addressing_mode, self.factory
+            "[{:?}] Opcode: 0x{:02X}, Size: {}, Cycles: {}, Mode: {:?}",
+            self.mnemonic, self.opcode, self.size, self.cycle_count, self.addressing_mode, 
         );
     }
 }

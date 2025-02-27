@@ -33,16 +33,21 @@ pub trait Bus {
     }
 
     fn read_byte(&self, address: u16) -> u8 {
+
+        // Regardless of if it's open bus or not, the cycle gets incremented.
+        self.increment_cycle_counter();
+
         let masked_address = address;//Self::mask_address(address);
 
         // Implement open-bus behavior - where invalid reads return the last
         // byte that was successfully read.
         if !self.is_readable(masked_address) {
-            self.get_last_read_value();
+            return self.get_last_read_value();
+            
         }
 
         let value = self.memory()[masked_address as usize];
-        self.increment_cycle_counter();
+        
 
         self.set_last_read_value(value);
 

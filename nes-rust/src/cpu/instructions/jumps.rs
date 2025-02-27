@@ -32,7 +32,7 @@ define_instruction!(RTS, |cpu: &mut CPU, memory: &mut CPUBus, _: u8| {
 // Return from Interrupt (RTI)
 define_instruction!(RTI, |cpu: &mut CPU, memory: &mut CPUBus, _: u8| {
     let new_processor_status = cpu.pull_stack(memory);
-    cpu.set_s(new_processor_status); // Fix: should update status, not stack pointer
+    cpu.set_s(new_processor_status);
     
     let low = cpu.pull_stack(memory) as u16;
     let high = cpu.pull_stack(memory) as u16;

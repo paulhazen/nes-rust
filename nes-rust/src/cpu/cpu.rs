@@ -25,7 +25,7 @@ impl CPU {
             y: 0, 
             pc: 0x8000, // NES program entry point
             s: 0xFD,
-            p: Status::UNUSED.bits(),
+            p: Status::UNUSED.bits() | Status::INTERRUPT_DISABLE.bits(),
             current_instruction: None,
         }
     }
@@ -171,11 +171,9 @@ impl CPU {
             
             self.set_current_opcode(instruction.clone());
 
-            let test = (instruction.factory)();
+            let executor = (instruction.factory)();
 
-            println!("{0:#?} {1:#x}", instruction.mnemonic, opcode);
-
-            test.execute(self, instruction, memory);
+            executor.execute(self, instruction, memory);
         } else {
             //println!("Could not find instruction for opcode \"{:#x}\".", opcode);
         }
@@ -209,7 +207,10 @@ impl CPU {
         self.pc = (high_byte << 8) | low_byte;
 
         // Reset the processor status
-        self.p = Status::UNUSED.bits()
+        self.p = Status::UNUSED.bits() | Status::INTERRUPT_DISABLE.bits();
+
+        // Reset stack pointer
+        self.s = 0xFD;
     }
 
     // startregion: Fetch functions

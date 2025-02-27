@@ -1,6 +1,5 @@
 use crate::{cartridge::Cartridge, memory::bus::Bus};
 use std::cell::Cell;
-use crate::util::print_hex_dump;
 
 pub struct CPUBus {
     memory: Box<[u8]>,

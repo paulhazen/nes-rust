@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-pub fn print_hex_dump(mut data: Box<[u8]>, range: Option<Range<usize>>) {
+pub fn print_hex_dump(data: Box<[u8]>, range: Option<Range<usize>>) {
     let start = range.as_ref().map_or(0, |r| r.start);
     let end = range.as_ref().map_or(data.len(), |r| r.end.min(data.len()));
 

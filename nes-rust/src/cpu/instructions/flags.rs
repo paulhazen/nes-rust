@@ -1,3 +1,5 @@
+// CLC, SEC, CLI, SEI, CLV, CLD, SED
+
 use crate::cpu::CPU;
 use crate::cpu::Status;
 use crate::memory::Bus;
