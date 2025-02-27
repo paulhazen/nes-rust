@@ -2,11 +2,12 @@
 
 use super::super::Status;
 use super::super::CPU;
-use crate::memory::MemoryBus;
+use crate::memory::Bus;
+use crate::memory::CPUBus;
 use crate::define_instruction;
 
 // Arithmetic Shift Left (ASL) - already implemented
-define_instruction!(ASL, |cpu: &mut CPU, _memory: &mut MemoryBus, mut value: u8| {
+define_instruction!(ASL, |cpu: &mut CPU, _memory: &mut CPUBus, mut value: u8| {
     cpu.set_flag(Status::CARRY, value & 0x80 != 0);
 
     value <<= 1; // Shift left
@@ -16,7 +17,7 @@ define_instruction!(ASL, |cpu: &mut CPU, _memory: &mut MemoryBus, mut value: u8|
 });
 
 // Logical Shift Right (LSR)
-define_instruction!(LSR, |cpu: &mut CPU, _memory: &mut MemoryBus, mut value: u8| {
+define_instruction!(LSR, |cpu: &mut CPU, _memory: &mut CPUBus, mut value: u8| {
     cpu.set_flag(Status::CARRY, value & 0x01 != 0);
 
     value >>= 1; // Shift right
@@ -26,7 +27,7 @@ define_instruction!(LSR, |cpu: &mut CPU, _memory: &mut MemoryBus, mut value: u8|
 });
 
 // Rotate Left (ROL)
-define_instruction!(ROL, |cpu: &mut CPU, _memory: &mut MemoryBus, mut value: u8| {
+define_instruction!(ROL, |cpu: &mut CPU, _memory: &mut CPUBus, mut value: u8| {
     let carry_in = cpu.is_flag_set(Status::CARRY) as u8;
     let new_carry = value & 0x80 != 0;
 
@@ -38,7 +39,7 @@ define_instruction!(ROL, |cpu: &mut CPU, _memory: &mut MemoryBus, mut value: u8|
 });
 
 // Rotate Right (ROR)
-define_instruction!(ROR, |cpu: &mut CPU, _memory: &mut MemoryBus, mut value: u8| {
+define_instruction!(ROR, |cpu: &mut CPU, _memory: &mut CPUBus, mut value: u8| {
     let carry_in = (cpu.is_flag_set(Status::CARRY) as u8) << 7;
     let new_carry = value & 0x01 != 0;
 

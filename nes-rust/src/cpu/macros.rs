@@ -1,4 +1,5 @@
 
+
 #[macro_export]
 macro_rules! instruction_metadata_entry {
     ($map:ident, $hex:expr, $mnemonic:ident, $size:expr, $cycles:expr, $mode:ident) => {
@@ -21,7 +22,7 @@ macro_rules! instruction_metadata_entry {
 #[macro_export]
 macro_rules! create_execute_function {
     ($execute_fn:expr) => {
-        |cpu: &mut CPU, bus: &mut crate::memory::MemoryBus, operand: u8| {
+        |cpu: &mut CPU, bus: &mut crate::memory::CPUBus, operand: u8| {
             $execute_fn(cpu, bus, operand.into())
         }
     };
@@ -34,9 +35,9 @@ macro_rules! define_instruction {
 
         impl crate::cpu::instruction::Instruction for $name {
             #[inline(always)]
-            fn execute(&self, cpu: &mut CPU, opcode: &crate::cpu::InstructionMetadata, memory: &mut crate::memory::MemoryBus) -> u8 {
+            fn execute(&self, cpu: &mut CPU, opcode: &crate::cpu::InstructionMetadata, memory: &mut crate::memory::CPUBus) -> u8 {
 
-                let execute_function: fn(&mut CPU, &mut crate::memory::MemoryBus, u8) = 
+                let execute_function: fn(&mut CPU, &mut crate::memory::CPUBus, u8) = 
                     crate::create_execute_function!($execute_fn);
 
                 let value =  match opcode.addressing_mode {
@@ -56,19 +57,18 @@ macro_rules! define_instruction {
                 };
                 
                 // Reset, and start counting cycles that may occur during execute function
-                memory.start_counting_cycles();
-
+                memory.set_cycle_counter(0);
                 execute_function(cpu, memory, value.try_into().unwrap());
 
                 // Retrieve the number of cycles that the memory bus recorded
-                let measured_cycles = memory.get_cycle_count();
+                let measured_cycles = memory.get_cycles();
 
                 // Get the number of base cycles that the instruction is supposed to take
                 let base_cycles = opcode.cycle_count;
 
                 // TODO: Inspect circumstances where measured_cycles != base_cycles.
 
-                measured_cycles
+                base_cycles
             }
         }
     };

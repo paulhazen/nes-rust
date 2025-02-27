@@ -10,12 +10,8 @@ paste = "1.0"
 bitflags = "2.8.0"
 
 [profile.dev]
-<<<<<<< HEAD
 opt-level = 0            # Ensure no optimizations
 debug = true             # Include debug symbols
 debug-assertions = true  # Keep debug assertions
 overflow-checks = true   # Keep overflow checks
 
-=======
-opt-level = 0 # Ensure no optimization for debugging
->>>>>>> parent of 9ef4987 (feat: Added PPU support)

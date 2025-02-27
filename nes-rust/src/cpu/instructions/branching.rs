@@ -2,6 +2,7 @@
 
 use crate::cpu::CPU;
 use crate::cpu::Status;
+use crate::memory::Bus;
 use crate::define_instruction;
 
 define_instruction!(BEQ, |cpu: &mut CPU, memory, offset: u8| {

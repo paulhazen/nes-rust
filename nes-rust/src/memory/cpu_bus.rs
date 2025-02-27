@@ -8,6 +8,9 @@ pub struct CPUBus {
 }
 
 impl CPUBus {
+    pub const UNMAPPED: u8 = 0xFF;
+    pub const RESET_VECTOR_ADDR: u16 = 0xFFFC;
+    pub const RESET_VECTOR_HIGH_ADDR: u16 = 0xFFFD;
     pub const RESET_VECTOR_DEFAULT: u16 = 0x8000;
 }
 
@@ -47,8 +50,8 @@ impl Bus for CPUBus {
         &[0x0000..0x1FF]
     }
 
-    fn mirror_mask() -> &'static Option<u16> {
-        &Some(0x07FF)
+    fn mirror_mask() -> u16 {
+        0x07FF
     }
 
     fn set_cycle_counter(&self, value: u8) {
