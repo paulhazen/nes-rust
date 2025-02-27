@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 use crate::cartridge::Cartridge;
 
@@ -272,3 +273,5 @@ impl PPU {
         self.status_register &= !STATUS_VBLANK_FLAG; // Clear VBlank flag
     }
 }
+=======
+>>>>>>> parent of 9ef4987 (feat: Added PPU support)

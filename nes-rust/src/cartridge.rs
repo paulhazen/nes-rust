@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::{self, BufReader, Read};
 
 /// Represents an NES cartridge.
-#[derive(Clone)]
 pub struct Cartridge {
     /// The parsed NES cartridge header containing metadata.
     pub header: CartridgeHeader,
@@ -13,7 +12,6 @@ pub struct Cartridge {
 }
 
 /// Stores metadata from an NES cartridge header.
-#[derive(Clone)]
 pub struct CartridgeHeader {
     /// The size of the PRG ROM in 16 KB units.
     pub prg_rom_size: u8,
@@ -90,10 +88,6 @@ impl Cartridge {
         } else {
             0xFF // Invalid read
         }
-    }
-
-    pub fn get_chr_rom(&self) -> &[u8] {
-        &self.chr_rom
     }
 
     /// Reads and validates the NES file header.
