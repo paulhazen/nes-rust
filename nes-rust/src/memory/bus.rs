@@ -1,5 +1,5 @@
 use std::ops::Range;
-use crate::cartridge::Cartridge;
+use crate::{cartridge::Cartridge, util};
 
 pub trait Bus {
 
@@ -12,11 +12,14 @@ pub trait Bus {
     fn load_cartridge(cartridge: Cartridge) -> Self;
 
     fn write_byte(&mut self, address: u16, value: u8) -> bool {
+
+        let masked_address = Self::mask_address(address);
+
         if !self.is_writeable(address) {
             return false;
         }
 
-        self.memory_mut()[address as usize] = value;
+        self.memory_mut()[masked_address as usize] = value;
         self.increment_cycle_counter();
 
         return true;
@@ -30,7 +33,8 @@ pub trait Bus {
     }
 
     fn read_byte(&self, address: u16) -> u8 {
-        let masked_address = address & Self::mirror_mask();
+        let masked_address = address;//Self::mask_address(address);
+
         // Implement open-bus behavior - where invalid reads return the last
         // byte that was successfully read.
         if !self.is_readable(masked_address) {
@@ -43,6 +47,10 @@ pub trait Bus {
         self.set_last_read_value(value);
 
         return value;
+    }
+
+    fn mask_address(address: u16) -> u16 {
+        address & Self::mirror_mask()
     }
 
     fn start_cycle_counter(&mut self) {
@@ -66,10 +74,14 @@ pub trait Bus {
         return self.memory().len() > address as usize
     }
 
+    fn dump_memory(&self) {
+        util::print_hex_dump(self.memory().clone(), None);   
+    }
+
     fn set_cycle_counter(&self, value: u8);
     fn get_cycles(&self) -> u8;
     fn set_last_read_value(&self, value: u8);
     fn get_last_read_value(&self) -> u8;
-    fn memory(&self) -> &[u8];
-    fn memory_mut(&mut self) -> &mut [u8];
+    fn memory(&self) -> &Box<[u8]>;
+    fn memory_mut(&mut self) -> &mut Box<[u8]>;
 }

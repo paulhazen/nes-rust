@@ -1,5 +1,6 @@
 use crate::{cartridge::Cartridge, memory::bus::Bus};
 use std::cell::Cell;
+use crate::util::print_hex_dump;
 
 pub struct CPUBus {
     memory: Box<[u8]>,
@@ -12,19 +13,21 @@ impl CPUBus {
     pub const RESET_VECTOR_ADDR: u16 = 0xFFFC;
     pub const RESET_VECTOR_HIGH_ADDR: u16 = 0xFFFD;
     pub const RESET_VECTOR_DEFAULT: u16 = 0x8000;
+    pub const RAM_START: u16 = 0x0000;
+    pub const RAM_END: u16 = 0x1FF;
 }
 
 impl Bus for CPUBus {
 
     fn load_cartridge(cartridge: Cartridge) -> Self {
-        let mut memory = vec![0xFF; 0x10000].into_boxed_slice();
+        let mut memory = vec![Self::UNMAPPED; 0x10000].into_boxed_slice();
 
         // Properly set the reset vector
-        memory[0xFFFC] = (Self::RESET_VECTOR_DEFAULT & 0xFF) as u8;
-        memory[0xFFFD] = (Self::RESET_VECTOR_DEFAULT >> 8) as u8;
+        memory[Self::RESET_VECTOR_ADDR as usize] = (Self::RESET_VECTOR_DEFAULT & Self::UNMAPPED as u16) as u8;
+        memory[Self::RESET_VECTOR_HIGH_ADDR as usize] = (Self::RESET_VECTOR_DEFAULT >> 8) as u8;
 
         let prg_rom_size = cartridge.prg_rom.len();
-        let prg_rom_start = 0x8000;
+        let prg_rom_start = Self::RESET_VECTOR_DEFAULT as usize;
     
         // Copy PRG-ROM into $8000-$BFFF
         memory[prg_rom_start..(prg_rom_start + prg_rom_size)]
@@ -37,17 +40,17 @@ impl Bus for CPUBus {
 
         Self {
             memory,
-            last_read_value: Cell::new(0xFF),
+            last_read_value: Cell::new(Self::UNMAPPED),
             cycle_counter: Cell::new(0x00),
         }
     }
 
     fn readable_ranges() -> &'static [std::ops::Range<u16>] {
-        &[0x0000..0xFFFF]
+        &[Self::RAM_START..0xFFFF]
     }
 
     fn writeable_ranges() -> &'static [std::ops::Range<u16>] {
-        &[0x0000..0x1FF]
+        &[Self::RAM_START..Self::RAM_END]
     }
 
     fn mirror_mask() -> u16 {
@@ -70,11 +73,11 @@ impl Bus for CPUBus {
         self.last_read_value.get()
     }
 
-    fn memory(&self) -> &[u8] {
+    fn memory(&self) -> &Box<[u8]> {
         &self.memory
     }
 
-    fn memory_mut(&mut self) -> &mut [u8] {
+    fn memory_mut(&mut self) -> &mut Box<[u8]> {
         &mut self.memory
     }
 }

@@ -12,6 +12,9 @@ impl NES {
     pub fn open_rom(rom_filepath: &str) -> Self {
         let cartridge = Cartridge::load_from_file(rom_filepath).unwrap();
         let memory_bus = CPUBus::load_cartridge(cartridge);
+
+        memory_bus.dump_memory();
+
         let cpu = CPU::new();
 
         cpu.dbg_view_opcode_table();
