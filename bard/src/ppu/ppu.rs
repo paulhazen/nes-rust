@@ -173,7 +173,7 @@ impl PPU {
         let low_byte = self.read_ppu_memory(tile_address);         
 
         // High bitplane
-        let high_byte = self.read_ppu_memory((tile_address + 8));
+        let high_byte = self.read_ppu_memory(tile_address + 8);
 
         let combined = (high_byte << 1) | low_byte;
     
