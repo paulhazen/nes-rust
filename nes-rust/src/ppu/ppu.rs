@@ -1,10 +1,9 @@
-<<<<<<< HEAD
-
 use crate::cartridge::Cartridge;
 
-const PPU_CYCLES_PER_SCANLINE: u16 = 341;
+// TODO: Move these constants into PPU if possible.
 const PPU_FRAME_BUFFER_HEIGHT: usize = 240;
 const PPU_FRAME_BUFFER_WIDTH: usize = 256;
+const PPU_CYCLES_PER_SCANLINE: u16 = 341;
 const PPU_VISIBLE_SCANLINES: u16 = 240; // Scanlines where pixels are drawn
 const PPU_POST_RENDER_SCANLINE: u16 = 240; // Idle scanline
 const PPU_VBLANK_START_SCANLINE: u16 = 241; // VBlank begins
@@ -16,6 +15,7 @@ const CONTROL_NMI_ENABLE_FLAG: u8 = 0b1000_0000; // Bit 7 in PPUCTRL ($2000)
 const CHR_ROM_SIZE: usize = 8192; // 8 KB of CHR-ROM (Pattern Table Data)
 
 pub struct PPU{
+
     pub frame_buffer: [u8; PPU_FRAME_BUFFER_WIDTH * PPU_FRAME_BUFFER_HEIGHT],
     cycle: u16,
     scanline: u16,
@@ -60,6 +60,13 @@ pub struct PPU{
 }
 
 impl PPU {
+
+    const ATTRIBUTE_TABLE_BASE_ADDRESS: u16 = 0x23C0;
+    const PATTERN_TABLE_BASE_ADDRESS: u16 = 0x0000;
+    const NAME_TABLE_BASE_ADDRESS: u16 = 0x2000;
+    const PALETTE_BASE_ADDRESS: u16 = 0x3F00;
+    pub const ADDRESS_MASK: u16 = 0x3FFF;
+
     pub fn load_from_cartridge(cartridge: &Cartridge) -> Self {
         let mut chr_rom = [0u8; CHR_ROM_SIZE];
         let cartridge_chr = cartridge.get_chr_rom();
@@ -68,7 +75,7 @@ impl PPU {
         chr_rom[..copy_size].copy_from_slice(&cartridge_chr[..copy_size]);
 
         // Load a simple default NES palette
-        let palette_ram = [
+        /* let palette_ram = [
             0x0F, 0x30, 0x27, 0x1A, // Background colors
             0x0F, 0x16, 0x20, 0x27, // First sprite palette
             0x0F, 0x16, 0x20, 0x27, // Second sprite palette
@@ -77,7 +84,7 @@ impl PPU {
             0x0F, 0x16, 0x20, 0x27, // Repeated palette
             0x0F, 0x16, 0x20, 0x27,
             0x0F, 0x16, 0x20, 0x27,
-        ];
+        ]; */
 
         PPU {
             frame_buffer: [0x00; PPU_FRAME_BUFFER_WIDTH * PPU_FRAME_BUFFER_HEIGHT],   // Initialize frame buffer to empty
@@ -88,7 +95,7 @@ impl PPU {
             control_register: 0x00,                                                   // All bits start cleared
             status_register: 0xA,                                                     // Expected open-bus state on power-up
             vram: [0x00; 2048],
-            palette_ram: palette_ram,//[0x00; 32],
+            palette_ram: [0x00; 32],
             chr_rom,
         }
     }
@@ -126,23 +133,29 @@ impl PPU {
     
 
     fn fetch_background_pixel(&self, x: usize, y: usize) -> u8 {
-        let tile_index = self.read_nametable(x, y);  // Get tile index from nametable
-        let tile_data = self.read_pattern_table(tile_index, y % 8); // Get tile pixel data
-        let color_palette = self.read_attribute_table(x, y); // Get color palette
+        // Get tile index from nametable
+        let tile_index = self.read_nametable(x, y);  
+
+        // Get tile pixel data
+        let tile_data = self.read_pattern_table(tile_index, y % 8); 
+
+        // Get color palette
+        let color_palette = self.read_attribute_table(x, y); 
     
-        let pixel = (tile_data >> (7 - (x % 8))) & 1; // Extract correct pixel from the tile row
+        // Extract correct pixel from the tile row
+        let pixel = (tile_data >> (7 - (x % 8))) & 1; 
     
-        self.get_final_pixel_color(pixel, color_palette) // Convert to correct color
+        // Convert to correct color
+        self.get_final_pixel_color(pixel, color_palette) 
     }
     
-
     fn read_nametable(&self, x: usize, y: usize) -> u8 {
         let tile_x = x / 8;
         let tile_y = y / 8;
-        let nametable_base = 0x2000;
-        let nametable_address = nametable_base + (tile_y * 32) + tile_x;
+
+        let nametable_address = Self::NAME_TABLE_BASE_ADDRESS + ((tile_y * 32) + tile_x) as u16;
         
-        let tile_index = self.read_ppu_memory(nametable_address as u16);
+        let tile_index = self.read_ppu_memory(nametable_address);
         
         if tile_index == 0 {
             println!("DEBUG: Nametable returned tile 0 at ({}, {})", tile_x, tile_y);
@@ -154,12 +167,14 @@ impl PPU {
     }
     
     fn read_pattern_table(&self, tile_index: u8, row: usize) -> u8 {
-        let pattern_table_base = 0x0000; // Background tiles usually use pattern table 0
-        let tile_address = pattern_table_base + (tile_index as u16 * 16) + row as u16;
+        let tile_address = Self::PATTERN_TABLE_BASE_ADDRESS + ((tile_index as u16 * 16) + row as u16) as u16;
     
-        let low_byte = self.read_ppu_memory(tile_address);         // Low bitplane
-        let high_byte = self.read_ppu_memory(tile_address + 8);   // High bitplane
-    
+        // Low bitplane
+        let low_byte = self.read_ppu_memory(tile_address);         
+
+        // High bitplane
+        let high_byte = self.read_ppu_memory((tile_address + 8));
+
         let combined = (high_byte << 1) | low_byte;
     
         println!(
@@ -174,10 +189,9 @@ impl PPU {
         let tile_x = x / 16; // 16x16 pixel block
         let tile_y = y / 16;
     
-        let attribute_table_base = 0x23C0; // Base address for attribute table
-        let attribute_address = attribute_table_base + (tile_y * 8) + tile_x;
+        let attribute_address = Self::ATTRIBUTE_TABLE_BASE_ADDRESS + ((tile_y * 8) + tile_x) as u16;
     
-        let attribute_byte = self.read_ppu_memory(attribute_address as u16);
+        let attribute_byte = self.read_ppu_memory(attribute_address);
     
         // Extract the correct 2-bit palette for this 8x8 tile
         let quadrant_x = (x % 16) / 8;
@@ -187,15 +201,13 @@ impl PPU {
         (attribute_byte >> shift) & 0b11 // Extract the 2-bit palette index
     }
     
-    
     fn get_final_pixel_color(&self, pixel: u8, color_palette: u8) -> u8 {
         if pixel == 0 {
             println!("DEBUG: Transparent pixel detected");
             return 0; // Color 0 is transparent
         }
     
-        let palette_base = 0x3F00; // Base address for palette RAM
-        let color_index = palette_base + (color_palette as u16 * 4) + pixel as u16;
+        let color_index = Self::PALETTE_BASE_ADDRESS + ((color_palette as u16 * 4) + pixel as u16) as u16;
         let color = self.read_ppu_memory(color_index);
     
         println!(
@@ -206,8 +218,6 @@ impl PPU {
         color
     }
     
-    
-
     fn read_ppu_memory(&self, address: u16) -> u8 {
         let address = address & 0x3FFF; // PPU addresses wrap at 16KB
 
@@ -272,6 +282,41 @@ impl PPU {
         self.frame_count += 1;
         self.status_register &= !STATUS_VBLANK_FLAG; // Clear VBlank flag
     }
+
+    #[cfg(debug_assertions)]
+    pub fn print_chr_rom_tiles(&self) {
+        let num_tiles = CHR_ROM_SIZE / 16;
+
+        for tile_index in 0..num_tiles {
+            println!("Tile {:02X}:", tile_index);
+
+            for row in 0..8 {
+                let low_byte = self.chr_rom[tile_index * 16 + row];      
+                let high_byte = self.chr_rom[tile_index * 16 + row + 8];
+
+                let mut row_str = String::new();
+
+                for col in 0..8 {
+                    let bit_position = 7 - col;
+                    let low_bit = (low_byte >> bit_position) & 1;
+                    let high_bit = (high_byte >> bit_position) & 1;
+                    let pixel_value = (high_bit << 1) | low_bit;
+
+                    let symbol = match pixel_value {
+                        0 => '.',
+                        1 => '░',
+                        2 => '▒',
+                        3 => '▓',
+                        _ => '?',
+                    };
+
+                    row_str.push(symbol);
+                }
+
+                println!("{}", row_str);
+            }
+
+            println!();
+        }
+    }    
 }
-=======
->>>>>>> parent of 9ef4987 (feat: Added PPU support)

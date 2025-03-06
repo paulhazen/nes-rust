@@ -82,9 +82,9 @@ impl CPU {
         }
     }    
 
-    pub fn step(&mut self, memory: &mut CPUBus) {
+    pub fn step(&mut self, memory: &mut CPUBus) -> u8{
         let opcode = self.fetch_byte(memory);
-        self.execute(opcode, memory);
+        self.execute(opcode, memory)
     }
 
     pub fn pull_stack(&mut self, memory: &CPUBus) -> u8 {
@@ -166,16 +166,17 @@ impl CPU {
     
     // endregion: Accessor methods
 
-    pub fn execute(&mut self, opcode: u8, memory: &mut CPUBus) {
+    pub fn execute(&mut self, opcode: u8, memory: &mut CPUBus) -> u8 {
         if let Some(instruction) = OPCODE_TABLE.get(&opcode) {
             
             self.set_current_opcode(instruction.clone());
 
             let executor = (instruction.factory)();
 
-            executor.execute(self, instruction, memory);
+            executor.execute(self, instruction, memory)
         } else {
             //println!("Could not find instruction for opcode \"{:#x}\".", opcode);
+            0
         }
     }
 

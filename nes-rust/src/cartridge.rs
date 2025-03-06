@@ -4,6 +4,7 @@ use std::io::{self, BufReader, Read};
 use crate::util;
 
 /// Represents an NES cartridge.
+#[derive(Clone)]
 pub struct Cartridge {
     /// The parsed NES cartridge header containing metadata.
     pub header: CartridgeHeader,
@@ -14,6 +15,7 @@ pub struct Cartridge {
 }
 
 /// Stores metadata from an NES cartridge header.
+#[derive(Clone)]
 pub struct CartridgeHeader {
     /// The size of the PRG ROM in 16 KB units.
     pub prg_rom_size: u8,
@@ -27,7 +29,6 @@ pub struct CartridgeHeader {
 
 impl Cartridge {
     const NES_HEADER_START: [u8; 3] = [0x4E, 0x45, 0x53];
-
 
     fn read_file_to_boxed_bytes(path: &str) -> io::Result<Box<[u8]>> {
         let mut file = File::open(path)?;
@@ -44,8 +45,6 @@ impl Cartridge {
 
         Ok(buffer.into_boxed_slice())
     }
-
-
 
     /// Loads an NES cartridge from a specified file path.
     ///
@@ -86,6 +85,10 @@ impl Cartridge {
             prg_rom,
             chr_rom,
         })
+    }
+
+    pub fn get_chr_rom(&self) -> Box<[u8]> {
+        self.chr_rom.clone()
     }
 
     /// Reads a byte from PRG ROM
