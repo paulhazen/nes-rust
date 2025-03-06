@@ -24,6 +24,8 @@ impl NES {
         let cpu = CPU::new();
         let ppu = PPU::load_from_cartridge(&cartridge.clone());
 
+        ppu.print_chr_rom_tiles();
+
         let viewer = FramebufferViewer::new();
 
         cpu.dbg_view_opcode_table();

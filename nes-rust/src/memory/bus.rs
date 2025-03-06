@@ -1,5 +1,5 @@
 use std::ops::Range;
-use crate::{cartridge::Cartridge, util};
+use crate::{util, cartridge::Cartridge};
 
 pub trait Bus {
 
