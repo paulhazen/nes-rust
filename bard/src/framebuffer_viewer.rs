@@ -9,9 +9,9 @@ pub struct FramebufferViewer {
 }
 
 impl FramebufferViewer {
-    pub fn new() -> Self {
+    pub fn new(title: &str) -> Self {
         let window = Window::new(
-            "NES Framebuffer Viewer",
+            title,
             WIDTH,
             HEIGHT,
             WindowOptions {

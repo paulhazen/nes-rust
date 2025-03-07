@@ -61,7 +61,7 @@ impl NES {
 
         //ppu_bus.borrow_mut().set_nmi_callback(|| cpu_bus.trigger_nmi());
 
-        let viewer = FramebufferViewer::new();
+        let viewer = FramebufferViewer::new(&rom_filepath);
 
         Self {
             cpu,
