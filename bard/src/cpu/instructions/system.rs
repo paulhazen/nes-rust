@@ -22,7 +22,8 @@ define_instruction!(BRK, |cpu: &mut CPU, memory: &mut CPUBus, _: u8| {
     cpu.set_flag(crate::cpu::Status::INTERRUPT_DISABLE, true);
 
     // Load new PC from IRQ/BRK vector ($FFFE/$FFFF)
-    let low = memory.read_word(0xFFFE);
-    let high = memory.read_word(0xFFFF);
+    // TODO: Properly overwrite read_word write_word in CPUBus!!!!
+    let low = memory.default_read_word(0xFFFE);
+    let high = memory.default_read_word(0xFFFF);
     cpu.set_pc((high << 8) | low);
 });

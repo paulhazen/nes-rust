@@ -7,8 +7,6 @@ use bard::nes::NES;
 
 fn main() {
     let mut nes = NES::open_rom("../roms/smb.nes");
-
-    
     nes.run();
     println!("Nothing to see here :D")
 }

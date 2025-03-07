@@ -58,20 +58,20 @@ impl CPU {
                 let addr = memory.read_byte(self.pc).wrapping_add(self.y);
                 addr as u16
             }
-            AddressingMode::Absolute => memory.read_word(self.pc),
-            AddressingMode::AbsoluteX => memory.read_word(self.pc).wrapping_add(self.x as u16),
-            AddressingMode::AbsoluteY => memory.read_word(self.pc).wrapping_add(self.y as u16),
+            AddressingMode::Absolute => memory.default_read_word(self.pc),
+            AddressingMode::AbsoluteX => memory.default_read_word(self.pc).wrapping_add(self.x as u16),
+            AddressingMode::AbsoluteY => memory.default_read_word(self.pc).wrapping_add(self.y as u16),
             AddressingMode::Indirect => {
-                let addr = memory.read_word(self.pc);
-                memory.read_word(addr) // Indirect fetch
+                let addr = memory.default_read_word(self.pc);
+                memory.default_read_word(addr) // Indirect fetch
             }
             AddressingMode::IndirectX => {
                 let base = memory.read_byte(self.pc).wrapping_add(self.x);
-                memory.read_word(base as u16) // Read pointer from zero page
+                memory.default_read_word(base as u16) // Read pointer from zero page
             }
             AddressingMode::IndirectY => {
                 let base = memory.read_byte(self.pc) as u16;
-                memory.read_word(base).wrapping_add(self.y as u16)
+                memory.default_read_word(base).wrapping_add(self.y as u16)
             }
             AddressingMode::Relative => {
                 let offset = memory.read_byte(self.pc) as i8 as i16; // Signed offset
@@ -102,7 +102,7 @@ impl CPU {
     
     pub fn push_stack(&mut self, memory: &mut CPUBus, value: u8) {
         let stack_address = 0x0100 | (self.s as u16); // Stack is at $0100 - $01FF
-        memory.write_byte(stack_address, value);  // Store value in memory
+        memory.default_write_byte(stack_address, value);  // Store value in memory
         self.s = self.s.wrapping_sub(1); // Decrement SP
     }
 

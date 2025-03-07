@@ -60,12 +60,12 @@ macro_rules! define_instruction {
                 memory.set_cycle_counter(0);
 
                 // Print the instruction metadata
-                opcode.debug_instruction_metadata();
+                //opcode.debug_instruction_metadata();
 
                 execute_function(cpu, memory, value.try_into().unwrap());
 
                 // Retrieve the number of cycles that the memory bus recorded
-                let measured_cycles = memory.get_cycles();
+                let _measured_cycles = memory.get_cycles();
 
                 // Get the number of base cycles that the instruction is supposed to take
                 let base_cycles = opcode.cycle_count;

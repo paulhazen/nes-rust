@@ -1,7 +1,7 @@
-use nes_rust::memory::Bus;
-use nes_rust::memory::CPUBus;
-use nes_rust::cartridge::Cartridge;
-use nes_rust::cartridge::CartridgeHeader;
+use bard::memory::Bus;
+use bard::memory::CPUBus;
+use bard::cartridge::Cartridge;
+use bard::cartridge::CartridgeHeader;
 
 #[cfg(test)]
 mod tests {

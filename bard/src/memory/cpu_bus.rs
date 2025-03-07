@@ -1,8 +1,11 @@
 use crate::{cartridge::Cartridge, memory::bus::Bus};
-use std::cell::Cell;
+use std::{cell::{Cell, RefCell}, rc::Rc};
+
+use super::PPUBus;
 
 pub struct CPUBus {
     memory: Box<[u8]>,
+    ppu_bus: Option<Rc<RefCell<PPUBus>>>,
     last_read_value: Cell<u8>,
     cycle_counter: Cell<u8>,
 }
@@ -14,6 +17,14 @@ impl CPUBus {
     pub const RESET_VECTOR_DEFAULT: u16 = 0x8000;
     pub const RAM_START: u16 = 0x0000;
     pub const RAM_END: u16 = 0x1FF;
+
+    pub fn set_ppu_bus(&mut self, ppu_bus: Rc<RefCell<PPUBus>>) {
+        self.ppu_bus = Some(ppu_bus);
+    }
+
+    pub fn trigger_nmi(&mut self) {
+        println!("CPU: NMI Triggered!");
+    }
 }
 
 impl Bus for CPUBus {
@@ -39,9 +50,53 @@ impl Bus for CPUBus {
 
         Self {
             memory,
+            ppu_bus: None,
             last_read_value: Cell::new(Self::UNMAPPED),
             cycle_counter: Cell::new(0x00),
         }
+    }
+
+    fn mask_address(address: u16) -> u16 {
+        match address {
+            0x800..0x1FFF => {
+                // This address is in the NES part of the RAM 
+                // that is mirrored to 0x0000-0x07FF, therefore the
+                // address needs to be masked to 2KB
+                address & 0x07FF
+            }
+            0x2008..0x3FFF => {
+                // This address is in the NES part of the PPU registers
+                // that are mirrored to 0x2000-0x2007, therefore the 
+                // address needs to be masked appropriately to that 
+                // range
+                0x2000 + (address & 0x0007)
+            }
+            _ => {
+                // The region of memory being accessed does not need
+                // to be masked - it maps directly to the address it
+                // already is
+                address
+            }
+        }
+    }
+
+    fn write_byte(&mut self, address: u16, value:u8) -> bool {
+        if (0x2000..=0x2007).contains(&address) {
+            if let Some(bus) = &self.ppu_bus {
+                bus.borrow_mut().write_register(address, value);
+                return true;
+            }
+        }
+        Bus::default_write_byte(self, address, value)
+    }
+
+    fn read_byte(&self, address: u16) -> u8 {
+        if (0x2000..=0x2007).contains(&address) {
+            if let Some(bus) = &self.ppu_bus {
+                return bus.borrow_mut().read_register(address)
+            }
+        }
+        Bus::default_read_byte(self, address)
     }
 
     fn readable_ranges() -> &'static [std::ops::Range<u16>] {
@@ -50,10 +105,6 @@ impl Bus for CPUBus {
 
     fn writeable_ranges() -> &'static [std::ops::Range<u16>] {
         &[Self::RAM_START..Self::RAM_END]
-    }
-
-    fn mirror_mask() -> u16 {
-        0x07FF
     }
 
     fn set_cycle_counter(&self, value: u8) {

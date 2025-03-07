@@ -1,3 +1,4 @@
+use std::{cell::{Cell, RefCell}, rc::Rc};
 use std::time::Duration;
 
 use crate::cpu::CPU;
@@ -5,60 +6,97 @@ use crate::ppu::PPU;
 use crate::cartridge::Cartridge;
 use crate::framebuffer_viewer::FramebufferViewer;
 use crate::memory::CPUBus;
+use crate::memory::PPUBus;
 use std::thread;
 use crate::memory::Bus;
 
 pub struct NES {
 
     pub cpu: CPU,
-    pub ppu: PPU,
-
     pub cpu_bus: CPUBus,
+
+    pub ppu: PPU,
+    pub ppu_bus: Rc<RefCell<PPUBus>>,
+    
     pub viewer: FramebufferViewer,
 }
 
 impl NES {
+    fn dump_nametable(ppu_bus: &PPUBus) {
+        println!("=== Nametable Dump (0x2000 - 0x23BF) ===");
+    
+        for tile_y in 0..30 {
+            for tile_x in 0..32 {
+                let address = 0x2000 + (tile_y * 32 + tile_x) as u16;
+                let tile_index = ppu_bus.read_byte(address);
+                print!("{:02X} ", tile_index);
+            }
+            println!(); // New line after each row
+        }
+    }
+    
     pub fn open_rom(rom_filepath: &str) -> Self {
         let cartridge = Cartridge::load_from_file(rom_filepath).unwrap();
-        let cpu_bus = CPUBus::load_cartridge(cartridge.clone());
-        let cpu = CPU::new();
-        let ppu = PPU::load_from_cartridge(&cartridge.clone());
 
-        ppu.print_chr_rom_tiles();
+        let cpu = CPU::new();
+        
+        let ppu = PPU::load_from_cartridge(&cartridge); // Create PPU first
+        let ppu_bus = Rc::new(RefCell::new(PPUBus::load_cartridge(cartridge.clone()))); // Create PPU bus
+
+        // Set VRAM address to 0x2000
+        ppu_bus.borrow_mut().write_register(0x2006, 0x20);  
+        ppu_bus.borrow_mut().write_register(0x2006, 0x00);  
+
+        // First read (ignored value from buffer)
+        let _ = ppu_bus.borrow_mut().read_register(0x2007);
+
+        // Second read (actual VRAM content)
+        let read_value = ppu_bus.borrow_mut().read_register(0x2007);
+
+        println!("DEBUG: Read VRAM value = {:02X}", read_value);
+
+        Self::dump_nametable(&ppu_bus.borrow_mut());
+
+        //ppu.print_chr_rom_tiles(&ppu_bus.borrow());
+
+        let mut cpu_bus = CPUBus::load_cartridge(cartridge);
+        cpu_bus.set_ppu_bus(Rc::clone(&ppu_bus));
+
+        //ppu_bus.borrow_mut().set_nmi_callback(|| cpu_bus.trigger_nmi());
 
         let viewer = FramebufferViewer::new();
 
-        cpu.dbg_view_opcode_table();
-
         Self {
-            cpu, 
-            ppu, 
+            cpu,
             cpu_bus,
-            viewer 
+            ppu,
+            ppu_bus,
+            viewer,
         }
     }
+    
 
     pub fn run(&mut self) {
 
         // Reset the CPU explicitly before running (TODO: This may not be needed)
         self.cpu.reset(&self.cpu_bus);
 
-        //let rng = rand::rng();
+        // Run CPU for a while before dumping
+        for _ in 0..10_000 {
+            self.cpu.step(&mut self.cpu_bus);
+        }
 
-        loop {
-            //for pixel in self.ppu.frame_buffer.iter_mut() {
-            //    *pixel = rng.random_range(0..=3);
-            //}
+        // Dump the nametable after execution
+        Self::dump_nametable(&self.ppu_bus.borrow());
 
-            let cycles = self.cpu.step(&mut self.cpu_bus);
+       loop {
+            let _cycles = self.cpu.step(&mut self.cpu_bus);
 
-            for _ in 0..(cycles * 3) {
-                self.ppu.tick()
+            for _ in 0..3 {
+                self.ppu.tick(&mut self.ppu_bus.borrow_mut());
             }
 
             self.viewer.update(&self.ppu.frame_buffer);
-
-            thread::sleep(Duration::from_millis(16));
 
             if !self.viewer.is_open() {
                 break

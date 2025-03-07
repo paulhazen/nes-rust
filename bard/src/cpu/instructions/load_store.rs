@@ -19,13 +19,13 @@ define_instruction!(LDY, |cpu: &mut CPU, _, value| {
 });
 
 define_instruction!(STA, |cpu: &mut CPU, memory: &mut CPUBus, address : u16| {
-    memory.write_byte(address, cpu.get_a());
+    memory.default_write_byte(address, cpu.get_a());
 });
 
 define_instruction!(STX, |cpu: &mut CPU, memory: &mut CPUBus, address : u16| {
-    memory.write_byte(address, cpu.get_x());
+    memory.default_write_byte(address, cpu.get_x());
 });
 
 define_instruction!(STY, |cpu: &mut CPU, memory: &mut CPUBus, address : u16| {
-    memory.write_byte(address, cpu.get_y());
+    memory.default_write_byte(address, cpu.get_y());
 });
