@@ -1,6 +1,5 @@
 use crate::cpu::instruction::Instruction;
 use crate::cpu::instruction_executor::InstructionExecutor;
-use crate::cpu::AddressingMode;
 use crate::memory::CPUBus;
 use crate::memory::Bus;
 use super::instruction_metadata::InstructionMetadata;
@@ -8,12 +7,25 @@ use super::opcode_table::OPCODE_TABLE;
 use super::Status;
 
 pub struct CPU {
+    // Accumulator
     a: u8,
+
+    // X register
     x: u8,
+
+    // Y register
     y: u8,
-    pc: u16,             
+
+    // Program counter register
+    pc: u16,          
+
+    // Stack register   
     s: u8,
+
+    // Status register
     p: u8,
+
+    
     current_instruction: Option<InstructionMetadata>,
 }
 
@@ -30,7 +42,7 @@ impl CPU {
         }
     }
 
-    // startregion: Functions to utilize the status register within the CPU
+    // region: Functions to utilize the status register within the CPU
 
     pub fn is_flag_set(&self, flag: Status) -> bool {
         self.p & flag.bits() != 0
@@ -45,42 +57,6 @@ impl CPU {
     }
 
     // endregion: Functions to utilize the status register within the CPU
-
-    pub fn get_effective_address(&self, addressing_mode: AddressingMode, memory: &CPUBus) -> u16 {
-        match addressing_mode {
-            AddressingMode::Immediate => self.pc, // PC points to operand
-            AddressingMode::ZeroPage => memory.read_byte(self.pc) as u16,
-            AddressingMode::ZeroPageX => {
-                let addr = memory.read_byte(self.pc).wrapping_add(self.x);
-                addr as u16
-            }
-            AddressingMode::ZeroPageY => {
-                let addr = memory.read_byte(self.pc).wrapping_add(self.y);
-                addr as u16
-            }
-            AddressingMode::Absolute => memory.default_read_word(self.pc),
-            AddressingMode::AbsoluteX => memory.default_read_word(self.pc).wrapping_add(self.x as u16),
-            AddressingMode::AbsoluteY => memory.default_read_word(self.pc).wrapping_add(self.y as u16),
-            AddressingMode::Indirect => {
-                let addr = memory.default_read_word(self.pc);
-                memory.default_read_word(addr) // Indirect fetch
-            }
-            AddressingMode::IndirectX => {
-                let base = memory.read_byte(self.pc).wrapping_add(self.x);
-                memory.default_read_word(base as u16) // Read pointer from zero page
-            }
-            AddressingMode::IndirectY => {
-                let base = memory.read_byte(self.pc) as u16;
-                memory.default_read_word(base).wrapping_add(self.y as u16)
-            }
-            AddressingMode::Relative => {
-                let offset = memory.read_byte(self.pc) as i8 as i16; // Signed offset
-                self.pc.wrapping_add(1).wrapping_add(offset as u16)
-            }
-            AddressingMode::Accumulator => panic!("Accumulator mode does not have an address"),
-            AddressingMode::Implied => panic!("Implied mode does not have an address"),
-        }
-    }    
 
     pub fn step(&mut self, memory: &mut CPUBus) -> u8{
         let opcode = self.fetch_byte(memory);
@@ -163,7 +139,7 @@ impl CPU {
             self.set_pc(new_pc);
         }
     }
-    
+
     // endregion: Accessor methods
 
     pub fn execute(&mut self, opcode: u8, memory: &mut CPUBus) -> u8 {
@@ -172,7 +148,7 @@ impl CPU {
             self.set_current_opcode(instruction.clone());
 
             let executor = (instruction.factory)();
-
+            
             executor.execute(self, instruction, memory)
         } else {
             //println!("Could not find instruction for opcode \"{:#x}\".", opcode);
@@ -196,7 +172,7 @@ impl CPU {
     /**
      * Executes the given op code executor.
      */
-    #[inline(always)]
+    //#[inline(always)]
     pub fn execute_instruction<T: Instruction>(&mut self, executor: InstructionExecutor<T>, memory: &mut CPUBus) {
         executor.execute(self, memory);
     }

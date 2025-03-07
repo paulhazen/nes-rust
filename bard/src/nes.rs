@@ -1,13 +1,10 @@
-use std::{cell::{Cell, RefCell}, rc::Rc};
-use std::time::Duration;
-
+use std::{cell::RefCell, rc::Rc};
 use crate::cpu::CPU;
 use crate::ppu::PPU;
 use crate::cartridge::Cartridge;
 use crate::framebuffer_viewer::FramebufferViewer;
 use crate::memory::CPUBus;
 use crate::memory::PPUBus;
-use std::thread;
 use crate::memory::Bus;
 
 pub struct NES {

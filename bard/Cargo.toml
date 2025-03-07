@@ -13,7 +13,6 @@ rand = "0.9.0"
 
 [profile.release]
 debug = true
-panic = "abort"
 
 [profile.dev]
 opt-level = 0            # Ensure no optimizations

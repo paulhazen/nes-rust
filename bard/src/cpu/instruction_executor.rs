@@ -10,6 +10,7 @@ pub struct InstructionExecutor<T: Instruction> {
 }
 
 impl<T: Instruction> InstructionExecutor<T> {
+
     pub fn new(opcode: InstructionMetadata, executor: T) -> Self {
         Self {instruction_metadata: opcode, executor }
     }

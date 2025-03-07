@@ -34,7 +34,7 @@ macro_rules! define_instruction {
         pub struct $name;
 
         impl crate::cpu::instruction::Instruction for $name {
-            #[inline(always)]
+            
             fn execute(&self, cpu: &mut CPU, opcode: &crate::cpu::InstructionMetadata, memory: &mut crate::memory::CPUBus) -> u8 {
 
                 let execute_function: fn(&mut CPU, &mut crate::memory::CPUBus, u8) = 
