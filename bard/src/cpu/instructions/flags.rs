@@ -1,34 +1,22 @@
 // CLC, SEC, CLI, SEI, CLV, CLD, SED
 
+use crate::cpu::instruction_mnemonic::InstructionMnemonic;
 use crate::cpu::CPU;
 use crate::cpu::Status;
-use crate::memory::Bus;
-use crate::define_instruction;
 
-define_instruction!(CLC, |cpu: &mut CPU, _, _: u8| {
-    cpu.set_flag(Status::CARRY, false);
-});
+impl CPU {
+    pub fn handle_flags(&mut self, mnemonic: &InstructionMnemonic) {
+        match mnemonic {
+            InstructionMnemonic::CLC => self.set_flag(Status::CARRY, false),
+            InstructionMnemonic::SEC => self.set_flag(Status::CARRY, true),
+            InstructionMnemonic::CLI => self.set_flag(Status::INTERRUPT_DISABLE, false),
+            InstructionMnemonic::SEI => self.set_flag(Status::INTERRUPT_DISABLE, true),
+            InstructionMnemonic::CLV => self.set_flag(Status::OVERFLOW, false),
+            InstructionMnemonic::CLD => self.set_flag(Status::DECIMAL, false),
+            InstructionMnemonic::SED => self.set_flag(Status::CARRY, true),
 
-define_instruction!(SEC, |cpu: &mut CPU, _, _: u8| {
-    cpu.set_flag(Status::CARRY, true);
-});
-
-define_instruction!(CLI, |cpu: &mut CPU, _, _: u8| {
-    cpu.set_flag(Status::INTERRUPT_DISABLE, false);
-});
-
-define_instruction!(SEI, |cpu: &mut CPU, _, _: u8| {
-    cpu.set_flag(Status::INTERRUPT_DISABLE, false)
-});
-
-define_instruction!(CLV, |cpu: &mut CPU, _, _: u8| {
-    cpu.set_flag(Status::OVERFLOW, false);
-});
-
-define_instruction!(CLD, |cpu: &mut CPU, _, _ :u8| {
-    cpu.set_flag(Status::DECIMAL, false)
-});
-
-define_instruction!(SED, |cpu: &mut CPU, _, _: u8| {
-    cpu.set_flag(Status::DECIMAL, true)
-});
+            // Empty match arm to satisfy compiler
+            _ => {},
+        }
+    }
+}

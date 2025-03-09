@@ -1,5 +1,5 @@
 pub mod flags;
-pub mod load_store;
+pub mod load;
 pub mod arithmetic;
 pub mod bitwise;
 pub mod shifts;
@@ -9,15 +9,5 @@ pub mod jumps;
 pub mod transfer;
 pub mod increment_decrement;
 pub mod system;
-
-pub use shifts::{ASL, LSR, ROL, ROR};
-pub use system::{NOP, BRK};
-pub use increment_decrement::{INC, DEC, INX, DEX, INY, DEY};
-pub use transfer::{TAX, TAY, TXA, TYA};
-pub use jumps::{JMP, JSR, RTS, RTI};
-pub use branching::{BEQ, BNE, BCS, BCC, BMI, BPL, BVC, BVS};
-pub use stack::{PHA, PHP, PLA, PLP, TSX, TXS};
-pub use bitwise::{AND, ORA, EOR, BIT};
-pub use arithmetic::{ADC, SBC, CMP, CPX, CPY};
-pub use flags::{CLC, SEC, CLI, SEI, CLV, CLD, SED,};
-pub use load_store::{LDA, LDX, LDY, STA, STX, STY};
+pub mod returns;
+pub mod store;

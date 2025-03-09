@@ -1,5 +1,3 @@
-use crate::cpu::instruction::Instruction;
-use crate::cpu::instruction_executor::InstructionExecutor;
 use crate::memory::CPUBus;
 use crate::memory::Bus;
 use super::instruction_metadata::InstructionMetadata;
@@ -25,11 +23,14 @@ pub struct CPU {
     // Status register
     p: u8,
 
-    
+
     current_instruction: Option<InstructionMetadata>,
 }
 
 impl CPU {
+    pub const SIGN_BIT: u8 = 0x80;
+    
+
     pub fn new() -> Self {
         CPU {
             a: 0, 
@@ -60,7 +61,7 @@ impl CPU {
 
     pub fn step(&mut self, memory: &mut CPUBus) -> u8{
         let opcode = self.fetch_byte(memory);
-        self.execute(opcode, memory)
+        self.execute_instruction(&opcode, memory)
     }
 
     pub fn pull_stack(&mut self, memory: &CPUBus) -> u8 {
@@ -142,20 +143,6 @@ impl CPU {
 
     // endregion: Accessor methods
 
-    pub fn execute(&mut self, opcode: u8, memory: &mut CPUBus) -> u8 {
-        if let Some(instruction) = OPCODE_TABLE.get(&opcode) {
-            
-            self.set_current_opcode(instruction.clone());
-
-            let executor = (instruction.factory)();
-            
-            executor.execute(self, instruction, memory)
-        } else {
-            //println!("Could not find instruction for opcode \"{:#x}\".", opcode);
-            0
-        }
-    }
-
     pub fn dbg_view_opcode_table(&self) {
         println!("=== START OPCODE_TABLE ===");
         for (key, value) in OPCODE_TABLE.iter() {
@@ -167,14 +154,6 @@ impl CPU {
     pub fn update_zero_and_negative_flags(&mut self, value: u8) {
         self.set_flag(Status::ZERO, value == 0);
         self.set_flag(Status::NEGATIVE, value & 0b1000_000 != 0);
-    }
-
-    /**
-     * Executes the given op code executor.
-     */
-    //#[inline(always)]
-    pub fn execute_instruction<T: Instruction>(&mut self, executor: InstructionExecutor<T>, memory: &mut CPUBus) {
-        executor.execute(self, memory);
     }
 
     pub fn reset(&mut self, memory: &CPUBus) {

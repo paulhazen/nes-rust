@@ -11,14 +11,14 @@ macro_rules! instruction_metadata_entry {
                     addressing_mode: crate::cpu::AddressingMode::$mode,
                     opcode: $hex,
                     size: $size,
-                    cycle_count: $cycles,
-                    factory: || Box::new(crate::cpu::instructions::[<$mnemonic>]), // Explicit module path
+                    cycle_count: $cycles
                 },
             );
         }
     };
 }
 
+/* 
 #[macro_export]
 macro_rules! create_execute_function {
     ($execute_fn:expr) => {
@@ -76,4 +76,4 @@ macro_rules! define_instruction {
             }
         }
     };
-}
+} */

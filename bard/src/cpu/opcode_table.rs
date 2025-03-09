@@ -1,8 +1,7 @@
 
 use std::collections::HashMap;
 use once_cell::sync::Lazy;
-use crate::instruction_metadata_entry;
-use crate::cpu::InstructionMetadata;
+use crate::{cpu::InstructionMetadata, instruction_metadata_entry};
 
 pub static OPCODE_TABLE : Lazy<HashMap<u8, InstructionMetadata>> = Lazy::new(|| {
     let mut map = HashMap::new();

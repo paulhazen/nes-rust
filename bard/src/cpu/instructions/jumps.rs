@@ -1,42 +1,18 @@
-// JMP, JSR, RTS, RTI
+// JMP, JSR
 use crate::cpu::CPU;
-use crate::memory::Bus;
 use crate::memory::CPUBus;
-use crate::define_instruction;
 
-// Jump (JMP)
-define_instruction!(JMP, |cpu: &mut CPU, _memory: &mut CPUBus, address: u16| {
-    cpu.set_pc(address);
-});
+impl CPU {
+    pub fn handle_jump(&mut self, operand: &u8) {
+        self.set_pc(*operand as u16);
+    }
 
-// Jump to Subroutine (JSR)
-define_instruction!(JSR, |cpu: &mut CPU, memory: &mut CPUBus, address: u16| {
-    let pc = cpu.get_pc().wrapping_sub(1);
-    
-    // Push high byte
-    cpu.push_stack(memory, (pc >> 8) as u8);
-    // Push low byte
-    cpu.push_stack(memory, (pc & 0xFF) as u8);
+    pub fn handle_jump_to_subroutine(&mut self, operand: &u8, memory: &mut CPUBus) {
+        let pc = self.get_pc().wrapping_sub(1);
 
-    // Jump to new address
-    cpu.set_pc(address);
-});
+        self.push_stack(memory, (pc >> 8) as u8);
+        self.push_stack(memory, (pc & 0xFF) as u8);
 
-// Return from Subroutine (RTS)
-define_instruction!(RTS, |cpu: &mut CPU, memory: &mut CPUBus, _: u8| {
-    let low = cpu.pull_stack(memory) as u16;
-    let high = cpu.pull_stack(memory) as u16;
-    cpu.set_pc(((high << 8) | low).wrapping_add(1));
-});
-
-// Return from Interrupt (RTI)
-define_instruction!(RTI, |cpu: &mut CPU, memory: &mut CPUBus, _: u8| {
-    let new_processor_status = cpu.pull_stack(memory);
-    cpu.set_s(new_processor_status);
-    
-    let low = cpu.pull_stack(memory) as u16;
-    let high = cpu.pull_stack(memory) as u16;
-    cpu.set_pc((high << 8) | low);
-});
-
-
+        self.set_pc(*operand as u16);
+    }
+}

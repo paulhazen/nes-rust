@@ -1,56 +1,62 @@
 // ADC, SBC, CMP, CPX, CPY
 
+use crate::cpu::instruction_mnemonic::InstructionMnemonic;
 use crate::cpu::CPU;
 use crate::cpu::Status;
-use crate::memory::Bus;
-use crate::memory::CPUBus;
-use crate::define_instruction;
 
-define_instruction!(ADC, |cpu: &mut CPU, _: &mut CPUBus, value: u8| {
+const BYTE_MASK: u16 = 0xFF;
+const CARRY_THRESHOLD: u16 = 0x100;
+const BORROW_ADJUSTMENT: u16 = 1;
+
+impl CPU {
+    pub fn handle_arithmetic(&mut self, operand: &u8, mnemonic: &InstructionMnemonic) {
+        match mnemonic {
+            // Add with carry
+            InstructionMnemonic::ADC => add_with_carry(self, operand),
+            
+            // Subtract with carry
+            InstructionMnemonic::SBC => subtract_with_carry(self, operand),
+
+            // Compare accumulator register
+            InstructionMnemonic::CMP => compare(self, operand, &self.get_a()),
+
+            // Compare x register
+            InstructionMnemonic::CPX => compare(self, operand, &self.get_x()),
+
+            // Compare y register
+            InstructionMnemonic::CPY => compare(self, operand, &self.get_y()),
+
+            // Empty arm so compiler doesn't complain
+            _ => {}
+        }
+    }
+}
+
+fn compare(cpu: &mut CPU, operand: &u8, compare_to: &u8) {
+    cpu.set_flag(Status::CARRY, compare_to >= operand);
+    let result = compare_to.wrapping_sub(*operand);
+    cpu.update_zero_and_negative_flags(result);
+}
+
+fn adjust_with_carry(cpu: &mut CPU, operand: u8, is_subtract: bool) {
+    let operand = if is_subtract { operand ^ BYTE_MASK as u8 } else { operand }; // 1's complement for subtraction
     let mut result = cpu.get_a() as u16;
-    result += value as u16;
-    result += cpu.is_flag_set(Status::CARRY) as u16;
+    result += operand as u16;
+    result += cpu.is_flag_set(Status::CARRY) as u16 - if is_subtract { BORROW_ADJUSTMENT } else { 0 }; // Adjust for SBC borrow
 
-    cpu.set_flag(Status::CARRY, result > 0xFF);
+    cpu.set_flag(Status::CARRY, result >= CARRY_THRESHOLD);
 
-    let is_overflow = ((cpu.get_a() ^ value) & 0x80 == 0) && ((cpu.get_a() ^ result as u8) & 0x80 != 0);
-
+    let is_overflow = ((cpu.get_a() ^ operand) & CPU::SIGN_BIT == 0) && ((cpu.get_a() ^ result as u8) & CPU::SIGN_BIT != 0);
     cpu.set_flag(Status::OVERFLOW, is_overflow);
 
     cpu.set_a(result as u8);
     cpu.update_zero_and_negative_flags(cpu.get_a());
-});
+}
 
-define_instruction!(SBC, |cpu: &mut CPU, _: &mut CPUBus, value: u8| {
-    let complement = value ^ 0xFF; // 1's complement of value
-    let mut result = cpu.get_a() as u16;
-    result += complement as u16;
-    result += cpu.is_flag_set(Status::CARRY) as u16; // Carry is treated as "borrow cleared" in SBC
+fn add_with_carry(cpu: &mut CPU, operand: &u8) {
+    adjust_with_carry(cpu, *operand, false);
+}
 
-    cpu.set_flag(Status::CARRY, result > 0xFF);
-
-    let is_overflow = ((cpu.get_a() ^ complement) & 0x80 == 0) && ((cpu.get_a() ^ result as u8) & 0x80 != 0);
-
-    cpu.set_flag(Status::OVERFLOW, is_overflow);
-
-    cpu.set_a(result as u8);
-    cpu.update_zero_and_negative_flags(cpu.get_a());
-});
-
-define_instruction!(CMP, |cpu: &mut CPU, _: &mut CPUBus, value: u8| {
-    cpu.set_flag(Status::CARRY, cpu.get_a() >= value);
-    let result = cpu.get_a().wrapping_sub(value);
-    cpu.update_zero_and_negative_flags(result);
-});
-
-define_instruction!(CPX, |cpu: &mut CPU, _: &mut CPUBus, value: u8| {
-    cpu.set_flag(Status::CARRY, cpu.get_x() >= value);
-    let result = cpu.get_x().wrapping_sub(value);
-    cpu.update_zero_and_negative_flags(result);
-});
-
-define_instruction!(CPY, |cpu: &mut CPU, _: &mut CPUBus, value: u8| {
-    cpu.set_flag(Status::CARRY, cpu.get_y() >= value);
-    let result = cpu.get_y().wrapping_sub(value);
-    cpu.update_zero_and_negative_flags(result);
-});
+fn subtract_with_carry(cpu: &mut CPU, operand: &u8) {
+    adjust_with_carry(cpu, *operand, true);
+}

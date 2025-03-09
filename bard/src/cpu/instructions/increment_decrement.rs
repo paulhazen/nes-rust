@@ -1,45 +1,47 @@
-// INC, DEC, INX, DEX, INY, DEY
+use crate::cpu::instruction_mnemonic::InstructionMnemonic;
 use crate::cpu::CPU;
-use crate::memory::Bus;
-use crate::memory::CPUBus;
-use crate::define_instruction;
+use crate::memory::{Bus, CPUBus};
 
-// Increment Memory (INC)
-define_instruction!(INC, |cpu: &mut CPU, _memory: &mut CPUBus, mut value: u8| {
-    value = value.wrapping_add(1);
-    cpu.update_zero_and_negative_flags(value);
-    cpu.set_a(value);
-});
+impl CPU {
 
-// Decrement Memory (DEC)
-define_instruction!(DEC, |cpu: &mut CPU, _memory: &mut CPUBus, mut value: u8| {
-    value = value.wrapping_sub(1);
-    cpu.update_zero_and_negative_flags(value);
-    cpu.set_a(value);
-});
+    pub fn handle_register_increment_and_decrement(&mut self, mnemonic: &InstructionMnemonic) {
+        match mnemonic {
+            InstructionMnemonic::INX => modify_value(self, Self::get_x, Self::set_x, |v| v.wrapping_add(1)),
+            InstructionMnemonic::DEX => modify_value(self, Self::get_x, Self::set_x, |v| v.wrapping_sub(1)),
+            InstructionMnemonic::INY => modify_value(self, Self::get_y, Self::set_y, |v| v.wrapping_add(1)),
+            InstructionMnemonic::DEY => modify_value(self, Self::get_y, Self::set_y, |v| v.wrapping_sub(1)),
+            _ => {},
+        }
+    }
 
-// Increment X Register (INX)
-define_instruction!(INX, |cpu: &mut CPU, _: &mut CPUBus, _: u8| {
-    cpu.set_x(cpu.get_x().wrapping_add(1));
-    cpu.update_zero_and_negative_flags(cpu.get_x());
-});
+    pub fn handle_memory_increment_and_decrement(&mut self, address: &u8, mnemonic: &InstructionMnemonic, memory: &mut CPUBus) {
+        match mnemonic {
+            InstructionMnemonic::INC => modify_memory(self, address, |v| v.wrapping_add(1), memory),
+            InstructionMnemonic::DEC => modify_memory(self, address, |v| v.wrapping_sub(1), memory),
+            _ => {},
+        }
+    }
+}
 
-// Increment Y Register (INY)
-define_instruction!(INY, |cpu: &mut CPU, _: &mut CPUBus, _: u8| {
-    cpu.set_y(cpu.get_y().wrapping_add(1));
-    cpu.update_zero_and_negative_flags(cpu.get_y());
-});
+/// Generalized function to increment or decrement a value.
+fn modify_value<F>(cpu: &mut CPU, get: impl Fn(&CPU) -> u8, set: impl Fn(&mut CPU, u8), op: F)
+where
+    F: Fn(u8) -> u8,
+{
+    let new_value = op(get(cpu));
+    set(cpu, new_value);
+    cpu.update_zero_and_negative_flags(new_value);
+}
 
-// Decrement X Register (DEX)
-define_instruction!(DEX, |cpu: &mut CPU, _: &mut CPUBus, _: u8| {
-    let new_x = cpu.get_x().wrapping_sub(1);
-    cpu.set_x(new_x);
-    cpu.update_zero_and_negative_flags(new_x);
-});
+/// Generalized function to modify memory at an address.
+fn modify_memory<F>(cpu: &mut CPU, operand: &u8, op: F, memory: &mut CPUBus)
+    where
+        F: Fn(u8) -> u8,
+    {
+        let address = *operand as u16;
+        let value = memory.read_byte(address);
+        let new_value = op(value);
+        memory.write_byte(address, new_value);
+        cpu.update_zero_and_negative_flags(new_value);
+    }
 
-// Decrement Y Register (DEY)
-define_instruction!(DEY, |cpu: &mut CPU, _: &mut CPUBus, _: u8| {
-    let new_y = cpu.get_y().wrapping_sub(1);
-    cpu.set_y(new_y);
-    cpu.update_zero_and_negative_flags(new_y);
-});

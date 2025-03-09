@@ -7,13 +7,13 @@ mod instruction;
 mod instructions;
 mod opcode_table;
 mod decoded_instruction;
+mod cpu_instructions;
 mod instruction_metadata;
 
 
 #[macro_use]
 pub mod macros;
 
-use instruction::Instruction;
 use instruction_metadata::InstructionMetadata;
 use status_register::Status;
 use instruction_mnemonic::InstructionMnemonic;

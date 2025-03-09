@@ -1,8 +1,5 @@
 use super::AddressingMode;
 use super::InstructionMnemonic;
-use super::Instruction;
-
-pub type InstructionFactory = fn() -> Box<dyn Instruction + 'static>;
 
 #[derive(Clone)]
 pub struct InstructionMetadata {
@@ -11,7 +8,6 @@ pub struct InstructionMetadata {
     pub size: u8,
     pub cycle_count: u8,
     pub addressing_mode: AddressingMode,
-    pub factory: InstructionFactory,
 }
 
 impl InstructionMetadata {

@@ -1,5 +1,4 @@
 use crate::{cartridge::Cartridge, memory::{Bus, PPUBus}};
-use rand::Rng;
 
 // TODO: Move these constants into PPU if possible.
 const PPU_FRAME_BUFFER_HEIGHT: usize = 240;
