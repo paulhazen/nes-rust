@@ -1,9 +1,9 @@
 use super::AddressingMode;
-use super::InstructionMnemonic;
+use super::Mnemonic;
 
 #[derive(Clone)]
 pub struct InstructionMetadata {
-    pub mnemonic: InstructionMnemonic,
+    pub mnemonic: Mnemonic,
     pub opcode: u8,
     pub size: u8,
     pub cycle_count: u8,

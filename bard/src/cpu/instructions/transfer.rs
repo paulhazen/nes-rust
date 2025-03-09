@@ -1,4 +1,4 @@
-use crate::cpu::instruction_mnemonic::InstructionMnemonic;
+use crate::cpu::mnemonic::Mnemonic;
 use crate::cpu::CPU;
 
 /// Local helper function to transfer a value between registers and update flags.
@@ -13,14 +13,14 @@ where
 }
 
 impl CPU {
-    pub fn handle_transfer(&mut self, mnemonic: &InstructionMnemonic) {
+    pub fn handle_transfer(&mut self, mnemonic: &Mnemonic) {
         match mnemonic {
-            InstructionMnemonic::TXA => transfer_and_update(Self::get_x, Self::set_a, self),
-            InstructionMnemonic::TYA => transfer_and_update(Self::get_y, Self::set_a, self),
-            InstructionMnemonic::TAY => transfer_and_update(Self::get_a, Self::set_y, self),
-            InstructionMnemonic::TAX => transfer_and_update(Self::get_a, Self::set_x, self),
-            InstructionMnemonic::TSX => transfer_and_update(Self::get_s, Self::set_x, self),
-            InstructionMnemonic::TXS => self.set_s(self.get_x()), // TXS does NOT update flags
+            Mnemonic::TXA => transfer_and_update(Self::get_x, Self::set_a, self),
+            Mnemonic::TYA => transfer_and_update(Self::get_y, Self::set_a, self),
+            Mnemonic::TAY => transfer_and_update(Self::get_a, Self::set_y, self),
+            Mnemonic::TAX => transfer_and_update(Self::get_a, Self::set_x, self),
+            Mnemonic::TSX => transfer_and_update(Self::get_s, Self::set_x, self),
+            Mnemonic::TXS => self.set_s(self.get_x()), // TXS does NOT update flags
             _ => return,
         }
     }

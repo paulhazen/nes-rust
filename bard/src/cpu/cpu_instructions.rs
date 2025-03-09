@@ -4,7 +4,7 @@ use crate::cpu::AddressingMode;
 use crate::cpu::CPU;
 use crate::memory::CPUBus;
 
-use super::instruction_mnemonic::InstructionMnemonic;
+use super::mnemonic::Mnemonic;
 use super::opcode_table::OPCODE_TABLE;
 
 impl CPU {
@@ -57,85 +57,85 @@ impl CPU {
 
             // region: Arithmetic
             
-            InstructionMnemonic::ADC | InstructionMnemonic::CMP | 
-            InstructionMnemonic::CPX | InstructionMnemonic::CPY | 
-            InstructionMnemonic::SBC => 
+            Mnemonic::ADC | Mnemonic::CMP | 
+            Mnemonic::CPX | Mnemonic::CPY | 
+            Mnemonic::SBC => 
                 self.handle_arithmetic(&operand, &instruction_metadata.mnemonic),
 
             // endregion
 
             // region: Bitwise 
 
-            InstructionMnemonic::AND | InstructionMnemonic::ORA |
-            InstructionMnemonic::EOR | InstructionMnemonic::BIT => 
+            Mnemonic::AND | Mnemonic::ORA |
+            Mnemonic::EOR | Mnemonic::BIT => 
                 self.handle_bitwise(&operand, &instruction_metadata.mnemonic),
 
             // endregion
 
             // region: Branching
 
-            InstructionMnemonic::BEQ | InstructionMnemonic::BNE |
-            InstructionMnemonic::BCS | InstructionMnemonic::BCC |
-            InstructionMnemonic::BMI | InstructionMnemonic::BPL |
-            InstructionMnemonic::BVC | InstructionMnemonic::BVS => 
+            Mnemonic::BEQ | Mnemonic::BNE |
+            Mnemonic::BCS | Mnemonic::BCC |
+            Mnemonic::BMI | Mnemonic::BPL |
+            Mnemonic::BVC | Mnemonic::BVS => 
                 self.handle_branching(&operand, &instruction_metadata.mnemonic, memory),
 
             // endregion
 
             // region: Flags
 
-            InstructionMnemonic::CLC | InstructionMnemonic::SEC |
-            InstructionMnemonic::CLI | InstructionMnemonic::SEI |
-            InstructionMnemonic::CLV | InstructionMnemonic::CLD |
-            InstructionMnemonic::SED => self.handle_flags(&instruction_metadata.mnemonic),
+            Mnemonic::CLC | Mnemonic::SEC |
+            Mnemonic::CLI | Mnemonic::SEI |
+            Mnemonic::CLV | Mnemonic::CLD |
+            Mnemonic::SED => self.handle_flags(&instruction_metadata.mnemonic),
             
             // endregion
             
             // region: Increment & Decrement
 
-            InstructionMnemonic::INC | InstructionMnemonic::DEC =>
+            Mnemonic::INC | Mnemonic::DEC =>
                 self.handle_memory_increment_and_decrement(&operand, &instruction_metadata.mnemonic, memory),
 
-            InstructionMnemonic::INX | InstructionMnemonic::DEX | 
-            InstructionMnemonic::INY | InstructionMnemonic::DEY => 
+            Mnemonic::INX | Mnemonic::DEX | 
+            Mnemonic::INY | Mnemonic::DEY => 
                 self.handle_register_increment_and_decrement(&instruction_metadata.mnemonic),
 
             // endregion
             
             // region: Jumps
 
-            InstructionMnemonic::JMP => self.handle_jump(&operand),
-            InstructionMnemonic::JSR => self.handle_jump_to_subroutine(&operand, memory),
+            Mnemonic::JMP => self.handle_jump(&operand),
+            Mnemonic::JSR => self.handle_jump_to_subroutine(&operand, memory),
 
             // endregion
 
             // region: Returns
 
-            InstructionMnemonic::RTI |
-            InstructionMnemonic::RTS => self.handle_return(&instruction_metadata.mnemonic, memory),
+            Mnemonic::RTI |
+            Mnemonic::RTS => self.handle_return(&instruction_metadata.mnemonic, memory),
 
             // endregion
 
             // region: Load
 
-            InstructionMnemonic::LDA | InstructionMnemonic::LDX |
-            InstructionMnemonic::LDY => self.handle_load(&operand, &instruction_metadata.mnemonic),
+            Mnemonic::LDA | Mnemonic::LDX |
+            Mnemonic::LDY => self.handle_load(&operand, &instruction_metadata.mnemonic),
 
             // endregion
 
             // region: Store
             
-            InstructionMnemonic::STA | InstructionMnemonic::STX |
-            InstructionMnemonic::STY => self.handle_store(&operand, &instruction_metadata.mnemonic, memory),
+            Mnemonic::STA | Mnemonic::STX |
+            Mnemonic::STY => self.handle_store(&operand, &instruction_metadata.mnemonic, memory),
 
             // endregion
 
             // region: Shifts
 
-            InstructionMnemonic::ASL |
-            InstructionMnemonic::LSR |
-            InstructionMnemonic::ROL |
-            InstructionMnemonic::ROR => {
+            Mnemonic::ASL |
+            Mnemonic::LSR |
+            Mnemonic::ROL |
+            Mnemonic::ROR => {
                 // For shifts, if the adressing mode is accumulator, then don't pass the
                 // operand, thus indicating that the accumulator should be udpated
                 let adjusted_address = if instruction_metadata.addressing_mode == AddressingMode::Absolute {
@@ -151,24 +151,24 @@ impl CPU {
 
             // region: Misc
 
-            InstructionMnemonic::NOP => self.handle_nop(),
-            InstructionMnemonic::BRK => self.handle_brk(memory),
+            Mnemonic::NOP => self.handle_nop(),
+            Mnemonic::BRK => self.handle_brk(memory),
             
             // endregion
 
             // region: Stack
 
-            InstructionMnemonic::PHA | InstructionMnemonic::PHP |
-            InstructionMnemonic::PLA | InstructionMnemonic::PLP 
+            Mnemonic::PHA | Mnemonic::PHP |
+            Mnemonic::PLA | Mnemonic::PLP 
                 => self.handle_stack(&instruction_metadata.mnemonic, memory),
 
             // endregion
             
             // region: Transfer
 
-            InstructionMnemonic::TXA | InstructionMnemonic::TYA |
-            InstructionMnemonic::TAY | InstructionMnemonic::TSX |
-            InstructionMnemonic::TXS | InstructionMnemonic::TAX 
+            Mnemonic::TXA | Mnemonic::TYA |
+            Mnemonic::TAY | Mnemonic::TSX |
+            Mnemonic::TXS | Mnemonic::TAX 
                 => self.handle_transfer(&instruction_metadata.mnemonic),
 
             // endregion

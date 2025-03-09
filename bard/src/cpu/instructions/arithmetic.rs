@@ -1,6 +1,6 @@
 // ADC, SBC, CMP, CPX, CPY
 
-use crate::cpu::instruction_mnemonic::InstructionMnemonic;
+use crate::cpu::mnemonic::Mnemonic;
 use crate::cpu::CPU;
 use crate::cpu::Status;
 
@@ -9,22 +9,22 @@ const CARRY_THRESHOLD: u16 = 0x100;
 const BORROW_ADJUSTMENT: u16 = 1;
 
 impl CPU {
-    pub fn handle_arithmetic(&mut self, operand: &u8, mnemonic: &InstructionMnemonic) {
+    pub fn handle_arithmetic(&mut self, operand: &u8, mnemonic: &Mnemonic) {
         match mnemonic {
             // Add with carry
-            InstructionMnemonic::ADC => add_with_carry(self, operand),
+            Mnemonic::ADC => add_with_carry(self, operand),
             
             // Subtract with carry
-            InstructionMnemonic::SBC => subtract_with_carry(self, operand),
+            Mnemonic::SBC => subtract_with_carry(self, operand),
 
             // Compare accumulator register
-            InstructionMnemonic::CMP => compare(self, operand, &self.get_a()),
+            Mnemonic::CMP => compare(self, operand, &self.get_a()),
 
             // Compare x register
-            InstructionMnemonic::CPX => compare(self, operand, &self.get_x()),
+            Mnemonic::CPX => compare(self, operand, &self.get_x()),
 
             // Compare y register
-            InstructionMnemonic::CPY => compare(self, operand, &self.get_y()),
+            Mnemonic::CPY => compare(self, operand, &self.get_y()),
 
             // Empty arm so compiler doesn't complain
             _ => {}

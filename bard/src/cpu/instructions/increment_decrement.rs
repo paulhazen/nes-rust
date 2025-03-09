@@ -1,23 +1,23 @@
-use crate::cpu::instruction_mnemonic::InstructionMnemonic;
+use crate::cpu::mnemonic::Mnemonic;
 use crate::cpu::CPU;
 use crate::memory::{Bus, CPUBus};
 
 impl CPU {
 
-    pub fn handle_register_increment_and_decrement(&mut self, mnemonic: &InstructionMnemonic) {
+    pub fn handle_register_increment_and_decrement(&mut self, mnemonic: &Mnemonic) {
         match mnemonic {
-            InstructionMnemonic::INX => modify_value(self, Self::get_x, Self::set_x, |v| v.wrapping_add(1)),
-            InstructionMnemonic::DEX => modify_value(self, Self::get_x, Self::set_x, |v| v.wrapping_sub(1)),
-            InstructionMnemonic::INY => modify_value(self, Self::get_y, Self::set_y, |v| v.wrapping_add(1)),
-            InstructionMnemonic::DEY => modify_value(self, Self::get_y, Self::set_y, |v| v.wrapping_sub(1)),
+            Mnemonic::INX => modify_value(self, Self::get_x, Self::set_x, |v| v.wrapping_add(1)),
+            Mnemonic::DEX => modify_value(self, Self::get_x, Self::set_x, |v| v.wrapping_sub(1)),
+            Mnemonic::INY => modify_value(self, Self::get_y, Self::set_y, |v| v.wrapping_add(1)),
+            Mnemonic::DEY => modify_value(self, Self::get_y, Self::set_y, |v| v.wrapping_sub(1)),
             _ => {},
         }
     }
 
-    pub fn handle_memory_increment_and_decrement(&mut self, address: &u8, mnemonic: &InstructionMnemonic, memory: &mut CPUBus) {
+    pub fn handle_memory_increment_and_decrement(&mut self, address: &u8, mnemonic: &Mnemonic, memory: &mut CPUBus) {
         match mnemonic {
-            InstructionMnemonic::INC => modify_memory(self, address, |v| v.wrapping_add(1), memory),
-            InstructionMnemonic::DEC => modify_memory(self, address, |v| v.wrapping_sub(1), memory),
+            Mnemonic::INC => modify_memory(self, address, |v| v.wrapping_add(1), memory),
+            Mnemonic::DEC => modify_memory(self, address, |v| v.wrapping_sub(1), memory),
             _ => {},
         }
     }

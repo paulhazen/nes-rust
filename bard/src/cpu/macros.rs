@@ -7,7 +7,7 @@ macro_rules! instruction_metadata_entry {
             $map.insert(
                 $hex as u8,
                 crate::cpu::InstructionMetadata {
-                    mnemonic: crate::cpu::InstructionMnemonic::$mnemonic,
+                    mnemonic: crate::cpu::Mnemonic::$mnemonic,
                     addressing_mode: crate::cpu::AddressingMode::$mode,
                     opcode: $hex,
                     size: $size,

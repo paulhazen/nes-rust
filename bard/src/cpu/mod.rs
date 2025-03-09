@@ -1,7 +1,6 @@
 mod addressing_mode;
 mod cpu;
-mod instruction_mnemonic;
-mod instruction_executor;
+mod mnemonic;
 mod status_register;
 mod instruction;
 mod instructions;
@@ -16,6 +15,6 @@ pub mod macros;
 
 use instruction_metadata::InstructionMetadata;
 use status_register::Status;
-use instruction_mnemonic::InstructionMnemonic;
+use mnemonic::Mnemonic;
 use addressing_mode::AddressingMode;
 pub use cpu::CPU;
