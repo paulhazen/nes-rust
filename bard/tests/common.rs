@@ -13,7 +13,7 @@ fn load_rom(rom_path: &str) -> Result<Vec<u8>> {
 }
 
 pub fn load_test_rom(rom_filename: &str) -> Cartridge {
-    let rom_path = setup_test_rom("dk.nes");
+    let rom_path = setup_test_rom(rom_filename);
     
     match load_rom(rom_path.to_str().unwrap()) {
         Ok(data) => assert!(!data.is_empty(), "ROM should not be empty"),

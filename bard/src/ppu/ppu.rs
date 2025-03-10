@@ -98,7 +98,6 @@ impl PPU {
         }
     }
     
-
     fn render_pixel(&mut self, ppu_bus: &mut PPUBus) {
         let x = self.cycle as usize;
         let y = self.scanline as usize;
@@ -110,7 +109,8 @@ impl PPU {
         let color = self.fetch_background_pixel(ppu_bus, x, y);
         self.frame_buffer[y * PPU_FRAME_BUFFER_WIDTH + x] = color;
     }
-    /* 
+    
+
     fn fetch_background_pixel(&self, ppu_bus: &PPUBus, x: usize, y: usize) -> u8 {
         // Get tile index from nametable
         let tile_index = self.read_nametable(ppu_bus, x, y);
@@ -128,24 +128,7 @@ impl PPU {
         let color = self.get_final_pixel_color(ppu_bus, pixel, color_palette); 
 
         color
-    } */
-
-    fn fetch_background_pixel(&self, ppu_bus: &PPUBus, x: usize, y: usize) -> u8 {
-        let tile_index = self.read_nametable(ppu_bus, x, y);
-        let tile_data = self.read_pattern_table(ppu_bus, tile_index, y % 8);
-    
-        let pixel = (tile_data >> (7 - (x % 8))) & 0b11;  // Extracts correct pixel
-    
-    /*
-        println!(
-            "DEBUG: Tile Index = {}, Tile Data = 0x{:02X}, Extracted Pixel = {}",
-            tile_index, tile_data, pixel
-        );
-    */
-        pixel
-    }
-    
-    
+    } 
     
     fn read_attribute_table(&self, x: usize, y: usize, ppu_bus: &PPUBus) -> u8 {
         let tile_x = x / 16; // 16x16 pixel block
@@ -165,18 +148,12 @@ impl PPU {
     
     fn get_final_pixel_color(&self, ppu_bus: &PPUBus, pixel: u8, color_palette: u8) -> u8 {
         if pixel == 0 {
-            //println!("DEBUG: Transparent pixel detected");
             return 0; // Color 0 is transparent
         } 
     
         let color_index = Self::PALETTE_BASE_ADDRESS + ((color_palette as u16 * 4) + pixel as u16) as u16;
         let color = ppu_bus.read_byte(color_index);
-    /*
-        println!(
-            "DEBUG: Pixel color lookup: pixel={} color_palette={} color_index=0x{:04X} -> color=0x{:02X}",
-            pixel, color_palette, color_index, color
-        );
-    */
+    
         color
     }
     
@@ -191,12 +168,6 @@ impl PPU {
         let low_byte = ppu_bus.read_byte(tile_address);
         let high_byte = ppu_bus.read_byte(tile_address + 8);
     
-    /* 
-        println!(
-            "DEBUG: Pattern Table Read -> Tile: {}, Row: {}, Address: 0x{:04X}, Low Byte: {:02X}, High Byte: {:02X}",
-            tile_index, row, tile_address, low_byte, high_byte
-        );
-    */
         low_byte | (high_byte << 1) // This is how NES forms a 2-bit color index
     }
     
@@ -206,11 +177,6 @@ impl PPU {
     
         let base_address = ((tile_y * 32) + tile_x) as u16;
         let tile_index = ppu_bus.read_byte(base_address);
-    
-/*         println!(
-            "DEBUG: Nametable Read -> Tile Index: {}, Address: 0x{:04X}, X: {}, Y: {}",
-            tile_index, base_address, x, y
-        ); */
     
         tile_index
     }
@@ -260,9 +226,6 @@ impl PPU {
         
         // Compute tile index from (x, y) position
         let tile_index = tile_y * tiles_per_row + tile_x;
-    
-/*         println!("DEBUG: Tile {:02X} -> X: {}, Y: {}", tile_index, tile_x, tile_y);
-        println!("Tile {:02X}:", tile_index); */
     
         for row in 0..8 {
             let tile_address = tile_index * TILE_SIZE + row;

@@ -1,6 +1,5 @@
 use bard::memory::PPUBus;
 use bard::memory::Bus;
-use bard::Cartridge;
 mod common;
 
 #[test]

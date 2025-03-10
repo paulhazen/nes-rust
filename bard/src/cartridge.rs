@@ -40,9 +40,6 @@ impl Cartridge {
         print!("Buffer is {} items long.", metadata.len());
         file.read_to_end(&mut buffer)?; // Read all bytes
 
-        let blah = buffer.clone().into_boxed_slice();
-        //util::print_hex_dump(blah, None);
-
         Ok(buffer.into_boxed_slice())
     }
 
@@ -61,11 +58,8 @@ impl Cartridge {
         let file = File::open(file_path)?;
         let mut reader = BufReader::new(file);
 
-        let raw_rom = Self::read_file_to_boxed_bytes(file_path)?;
-        //util::print_hex_dump(raw_rom, None);
-
         // Read and validate the NES header
-        let header = Self::load_header(&mut reader)?; // ✅ Now propagates `io::Error`
+        let header = Self::load_header(&mut reader)?;
 
         // Allocate memory for PRG and CHR ROMs based on header values
         let mut prg_rom = vec![0u8; (header.prg_rom_size as usize * 16_384).into()].into_boxed_slice();
