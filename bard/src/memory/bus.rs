@@ -37,7 +37,7 @@ pub trait Bus {
         let low_byte = self.read_byte(address) as u16;
         let high_byte = self.read_byte(address.wrapping_add(1)) as u16;
 
-        (high_byte << 8) | low_byte
+        low_byte | (high_byte << 8)
     }
 
     fn default_read_byte(&self, address: u16) -> u8 {
@@ -90,6 +90,7 @@ pub trait Bus {
 
     fn write_byte(&mut self, address:u16, value:u8) -> bool;
     fn read_byte(&self, address:u16) -> u8;
+    fn read_word(&self, address: u16) -> u16;
     fn mask_address(address: u16) -> u16;
     fn set_cycle_counter(&self, value: u8);
     fn get_cycles(&self) -> u8;

@@ -1,3 +1,12 @@
+//! # instruction_metadata.rs
+//!
+//! **Author:** Paul Hazen
+//! **Created:** 2025-03-10
+//! **License:** MIT (see LICENSE file)
+//!
+//! ## Description
+//! Contains the struct definition for InstructionMetadata
+
 use super::AddressingMode;
 use super::Mnemonic;
 

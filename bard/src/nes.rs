@@ -1,3 +1,12 @@
+//! # nes.rs
+//!
+//!  Author: Paul Hazen
+//! Created: 2025-03-10
+//! License: MIT (see LICENSE file)
+//!
+//! ## Description
+//! Contains the implementation for the NES struct - which serves to orchestrate the various components of the emulator.
+//! 
 use std::{cell::RefCell, rc::Rc};
 use crate::cpu::CPU;
 use crate::ppu::PPU;
@@ -77,11 +86,6 @@ impl NES {
 
         // Reset the CPU explicitly before running (TODO: This may not be needed)
         self.cpu.reset(&self.cpu_bus);
-
-        // Run CPU for a while before dumping
-        for _ in 0..10_000 {
-            self.cpu.step(&mut self.cpu_bus);
-        }
 
         // Dump the nametable after execution
         Self::dump_nametable(&self.ppu_bus.borrow());

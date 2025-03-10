@@ -1,2 +1,6 @@
+# Do not check any ROM files into repository
 *.nes
+*.nes.deb
+
+# Except for nestest.nes
 !nestest.nes

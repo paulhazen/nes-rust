@@ -1,3 +1,4 @@
+use std::fmt;
 use crate::memory::CPUBus;
 use crate::memory::Bus;
 use super::instruction_metadata::InstructionMetadata;
@@ -23,14 +24,39 @@ pub struct CPU {
     // Status register
     p: u8,
 
+    logging: bool,
 
     current_instruction: Option<InstructionMetadata>,
+}
+
+impl fmt::Display for CPU {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let status_chars = [
+            if (self.p & 0b1000_0000) != 0 { 'N' } else { 'n' }, // Negative
+            if (self.p & 0b0100_0000) != 0 { 'V' } else { 'v' }, // Overflow
+            if (self.p & 0b0010_0000) != 0 { 'U' } else { 'u' }, // Unused (always 1)
+            if (self.p & 0b0001_0000) != 0 { 'B' } else { 'b' }, // Break
+            if (self.p & 0b0000_1000) != 0 { 'D' } else { 'd' }, // Decimal (ignored on NES)
+            if (self.p & 0b0000_0100) != 0 { 'I' } else { 'i' }, // Interrupt Disable
+            if (self.p & 0b0000_0010) != 0 { 'Z' } else { 'z' }, // Zero
+            if (self.p & 0b0000_0001) != 0 { 'C' } else { 'c' }, // Carry
+        ];
+
+        write!(
+            f,
+            "A:{:02X} X:{:02X} Y:{:02X} S:{:02X} P:{}",
+            self.a,
+            self.x,
+            self.y,
+            self.s,
+            status_chars.iter().collect::<String>()
+        )
+    }
 }
 
 impl CPU {
     pub const SIGN_BIT: u8 = 0x80;
     
-
     pub fn new() -> Self {
         CPU {
             a: 0, 
@@ -39,6 +65,7 @@ impl CPU {
             pc: 0x8000, // NES program entry point
             s: 0xFD,
             p: Status::UNUSED.bits() | Status::INTERRUPT_DISABLE.bits(),
+            logging: true,
             current_instruction: None,
         }
     }
@@ -61,6 +88,12 @@ impl CPU {
 
     pub fn step(&mut self, memory: &mut CPUBus) -> u8{
         let opcode = self.fetch_byte(memory);
+
+        if self.logging {
+            let disassembly = self.disassemble_instruction(self.pc, memory);
+            println!("{}", disassembly);
+        }
+ 
         self.execute_instruction(&opcode, memory)
     }
 
@@ -157,17 +190,15 @@ impl CPU {
     }
 
     pub fn reset(&mut self, memory: &CPUBus) {
-        let low_byte = memory.read_byte(CPUBus::RESET_VECTOR_ADDR) as u16;
-        let high_byte = memory.read_byte(CPUBus::RESET_VECTOR_HIGH_ADDR) as u16;
+        self.pc = memory.read_word(0xFFFC);
 
-        self.pc = (high_byte << 8) | low_byte;
-
-        // Reset the processor status
-        self.p = Status::UNUSED.bits() | Status::INTERRUPT_DISABLE.bits();
-
-        // Reset stack pointer
+        self.a = 0x00;
+        self.x = 0x00;
+        self.y = 0x00;
         self.s = 0xFD;
+        self.p = 0x43;
     }
+    
 
     // startregion: Fetch functions
 

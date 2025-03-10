@@ -1,7 +1,24 @@
 
 use std::collections::HashMap;
 use once_cell::sync::Lazy;
-use crate::{cpu::InstructionMetadata, instruction_metadata_entry};
+use crate::cpu::InstructionMetadata;
+
+macro_rules! instruction_metadata_entry {
+    ($map:ident, $hex:expr, $mnemonic:ident, $size:expr, $cycles:expr, $mode:ident) => {
+        ::paste::paste! {
+            $map.insert(
+                $hex as u8,
+                crate::cpu::InstructionMetadata {
+                    mnemonic: crate::cpu::Mnemonic::$mnemonic,
+                    addressing_mode: crate::cpu::AddressingMode::$mode,
+                    opcode: $hex,
+                    size: $size,
+                    cycle_count: $cycles
+                },
+            );
+        }
+    };
+}
 
 pub static OPCODE_TABLE : Lazy<HashMap<u8, InstructionMetadata>> = Lazy::new(|| {
     let mut map = HashMap::new();

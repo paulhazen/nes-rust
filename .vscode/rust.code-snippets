@@ -1,0 +1,16 @@
+{
+    "Rust File Header": {
+        "prefix": "rustdoc-header",
+        "body": [
+            "//! # ${TM_FILENAME}",
+            "//!",
+            "//!  Author: Paul Hazen",
+            "//! Created: ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}",
+            "//! License: MIT (see LICENSE file)",
+            "//!",
+            "//! ## Description",
+            "//! ${1:Brief description of the file's purpose}",
+        ],
+        "description": "Insert a Rustdoc comment header"
+    }
+}

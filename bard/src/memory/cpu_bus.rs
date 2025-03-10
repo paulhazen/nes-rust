@@ -99,6 +99,10 @@ impl Bus for CPUBus {
         Bus::default_read_byte(self, address)
     }
 
+    fn read_word(&self, address: u16) -> u16 {
+        Bus::default_read_word(self, address)
+    }
+
     fn readable_ranges() -> &'static [std::ops::Range<u16>] {
         &[Self::RAM_START..0xFFFF]
     }

@@ -41,8 +41,11 @@ fn compare(cpu: &mut CPU, operand: &u8, compare_to: &u8) {
 fn adjust_with_carry(cpu: &mut CPU, operand: u8, is_subtract: bool) {
     let operand = if is_subtract { operand ^ BYTE_MASK as u8 } else { operand }; // 1's complement for subtraction
     let mut result = cpu.get_a() as u16;
-    result += operand as u16;
-    result += cpu.is_flag_set(Status::CARRY) as u16 - if is_subtract { BORROW_ADJUSTMENT } else { 0 }; // Adjust for SBC borrow
+    result = result.wrapping_add(operand as u16);
+
+    let carry_in = if cpu.is_flag_set(Status::CARRY) { 1 } else { 0 };
+    let borrow = if is_subtract { BORROW_ADJUSTMENT } else { 0 };
+    result = result.wrapping_add(carry_in).wrapping_sub(borrow);
 
     cpu.set_flag(Status::CARRY, result >= CARRY_THRESHOLD);
 

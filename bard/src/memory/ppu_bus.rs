@@ -181,10 +181,11 @@ impl Bus for PPUBus {
 
     fn read_byte(&self, address:u16) -> u8 {
         let value = self.default_read_byte(address);
-
-        //println!("DEBUG: PPU Memory Read -> Address: 0x{:04X}, Value: 0x{:02X}", address, value);
-
         value
+    }
+
+    fn read_word(&self, address:u16) -> u16 {
+        Bus::default_read_word(self, address)
     }
     
     fn write_byte(&mut self, address:u16, value:u8) -> bool {
