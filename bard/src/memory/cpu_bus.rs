@@ -12,11 +12,11 @@ pub struct CPUBus {
 
 impl CPUBus {
     pub const UNMAPPED: u8 = 0xFF;
-    pub const RESET_VECTOR_ADDR: u16 = 0xFFFC;
-    pub const RESET_VECTOR_HIGH_ADDR: u16 = 0xFFFD;
+    pub const RESET_VECTOR_ADDR_LOW: u16 = 0xFFFC;
+    pub const RESET_VECTOR_ADDR_HIGH: u16 = 0xFFFD;
     pub const RESET_VECTOR_DEFAULT: u16 = 0x8000;
     pub const RAM_START: u16 = 0x0000;
-    pub const RAM_END: u16 = 0x1FF;
+    pub const RAM_END: u16 = 0x1FFF;
 
     pub fn set_ppu_bus(&mut self, ppu_bus: Rc<RefCell<PPUBus>>) {
         self.ppu_bus = Some(ppu_bus);
@@ -31,13 +31,9 @@ impl Bus for CPUBus {
 
     fn load_cartridge(cartridge: Cartridge) -> Self {
         let mut memory = vec![Self::UNMAPPED; 0x10000].into_boxed_slice();
-
-        // Properly set the reset vector
-        memory[Self::RESET_VECTOR_ADDR as usize] = (Self::RESET_VECTOR_DEFAULT & Self::UNMAPPED as u16) as u8;
-        memory[Self::RESET_VECTOR_HIGH_ADDR as usize] = (Self::RESET_VECTOR_DEFAULT >> 8) as u8;
-
+    
         let prg_rom_size = cartridge.prg_rom.len();
-        let prg_rom_start = Self::RESET_VECTOR_DEFAULT as usize;
+        let prg_rom_start = Self::RESET_VECTOR_DEFAULT as usize; // PRG-ROM is mapped to $8000-$BFFF
     
         // Copy PRG-ROM into $8000-$BFFF
         memory[prg_rom_start..(prg_rom_start + prg_rom_size)]
@@ -47,7 +43,14 @@ impl Bus for CPUBus {
         if prg_rom_size == 0x4000 {
             memory[0xC000..=0xFFFF].copy_from_slice(&cartridge.prg_rom);
         }
-
+    
+        // Ensure the reset vector is read from the cartridge PRG-ROM
+        let reset_vector_lsb = memory[0xFFFC]; // Low byte
+        let reset_vector_msb = memory[0xFFFD]; // High byte
+        let reset_address = ((reset_vector_msb as u16) << 8) | (reset_vector_lsb as u16);
+    
+        println!("Loaded reset vector: {:04X}", reset_address); // Debugging
+    
         Self {
             memory,
             ppu_bus: None,
@@ -55,10 +58,11 @@ impl Bus for CPUBus {
             cycle_counter: Cell::new(0x00),
         }
     }
+    
 
     fn mask_address(address: u16) -> u16 {
         match address {
-            0x800..0x1FFF => {
+            0x0000..0x1FFF => {
                 // This address is in the NES part of the RAM 
                 // that is mirrored to 0x0000-0x07FF, therefore the
                 // address needs to be masked to 2KB

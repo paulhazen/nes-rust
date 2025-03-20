@@ -61,6 +61,8 @@ impl NES {
 
         ppu_bus.borrow().dump_memory();
 
+        ppu.print_chr_rom_tiles(&ppu_bus.borrow());
+
         let mut cpu_bus = CPUBus::load_cartridge(cartridge);
 
         cpu_bus.dump_memory();

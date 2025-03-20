@@ -52,7 +52,6 @@ pub trait Bus {
         // byte that was successfully read.
         if !self.is_readable(masked_address) {
             return self.get_last_read_value();
-            
         }
 
         let value = self.memory()[masked_address as usize];
@@ -76,12 +75,32 @@ pub trait Bus {
     }
 
     fn is_writeable(&self, address:u16) -> bool {
-        self.is_valid_address(address) && Self::writeable_ranges().iter().any(|r| r.contains(&address))
+        if !self.is_valid_address(address ) {
+            return false
+        } 
+        
+        let within_range = Self::writeable_ranges().iter().any(|r| r.contains(&address));
+
+        let lower = &Self::writeable_ranges()[0].start;
+        let upper = &Self::writeable_ranges()[0].end;
+
+        if !within_range {
+            println!("Address {:?} is not within range [{:?} - {:?}]", address, lower, upper);
+            return false
+        }
+
+        true
     }
 
     // Note that this function EXPECTS THE ADDRESS to be masked
     fn is_valid_address(&self, address:u16) -> bool {
-        return self.memory().len() > address as usize
+        let is_valid = self.memory().len() > address as usize;
+
+        if !is_valid {
+            println!("Address {:?} is invalid", address)
+        }
+
+        is_valid
     }
 
     fn dump_memory(&self) {

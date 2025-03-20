@@ -136,6 +136,7 @@ impl PPUBus {
 }
 
 impl Bus for PPUBus {
+    
     fn readable_ranges() -> &'static [std::ops::Range<u16>] {
         &[
             0x0000..0x2000, // Pattern tables (CHR-ROM / CHR-RAM)

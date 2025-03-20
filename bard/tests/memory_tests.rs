@@ -108,8 +108,8 @@ mod tests {
     #[test]
     fn test_reset_vector_fetch() {
         let mut prg_rom_data = vec![0; 16 * 1024]; // 16KB ROM
-        prg_rom_data[0xFFFC - 0x8000] = 0x00; // LSB of reset vector
-        prg_rom_data[0xFFFD - 0x8000] = 0x80; // MSB of reset vector (0x8000 start address)
+        prg_rom_data[0x3FFC] = 0x00; // LSB of reset vector
+        prg_rom_data[0x3FFD] = 0x80; // MSB of reset vector
 
         let cartridge = create_test_cartridge(prg_rom_data);
         let bus = CPUBus::load_cartridge(cartridge);
@@ -117,6 +117,7 @@ mod tests {
         assert_eq!(bus.read_byte(0xFFFC), 0x00);
         assert_eq!(bus.read_byte(0xFFFD), 0x80);
     }
+
 
     /*
     #[test]
@@ -162,7 +163,10 @@ mod tests {
         let mut bus = CPUBus::load_cartridge(cartridge);
 
         // Write at a mirrored region
-        bus.write_byte(0x1000, 0x77);
+        let write_succeeded = bus.write_byte(0x1000, 0x77);
+
+        // Check that the writing was successful.
+        assert_eq!(write_succeeded, true);
 
         // Check all mirrored locations
         assert_eq!(bus.read_byte(0x0000), 0x77);
