@@ -6,6 +6,6 @@ pub use cpu::CPU;
 use bard::nes::NES;
 
 fn main() {
-    let mut nes = NES::open_rom("../roms/smb.nes");
+    let mut nes = NES::open_rom("../roms/dk.nes");
     nes.run();
 }

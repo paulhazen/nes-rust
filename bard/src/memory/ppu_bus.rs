@@ -86,8 +86,11 @@ impl PPUBus {
             0x2002 => {
                 // PPUSTATUS: Return status and clear VBlank flag
                 let status = self.ppu_status;
-                self.ppu_status &= 0x7F; // Clear VBlank flag after read
-                //println!("PPU: Status Register read ({:02X})", status);
+
+                self.ppu_status &= !0x80; // ✅ Clear VBlank flag (bit 7)
+                self.nmi_callback = None; // ✅ Prevent unwanted NMIs
+                self.oam_addr = 0x00; // ✅ Reset OAM latch
+
                 status
             }
             0x2004 => {

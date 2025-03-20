@@ -79,24 +79,27 @@ impl PPU {
         }
     }
 
-    pub fn tick(&mut self, ppu_bus: &mut PPUBus) {
-        self.cycle += 1;
+    pub fn tick(&mut self, ppu_bus: &mut PPUBus, cpu_cycles: u8) {
+        for _ in 0..(cpu_cycles * 3) { // Each CPU cycle advances the PPU by ~3
+            self.cycle += 1;
     
-        if self.scanline < PPU_VISIBLE_SCANLINES && self.cycle < PPU_FRAME_BUFFER_WIDTH as u16 {
-            self.render_pixel(ppu_bus);
-        }
+            if self.scanline < PPU_VISIBLE_SCANLINES && self.cycle < PPU_FRAME_BUFFER_WIDTH as u16 {
+                self.render_pixel(ppu_bus);
+            }
     
-        if self.cycle >= PPU_CYCLES_PER_SCANLINE {
-            self.cycle = 0;
-            self.scanline += 1;
+            if self.cycle >= PPU_CYCLES_PER_SCANLINE {
+                self.cycle = 0;
+                self.scanline += 1;
     
-            match self.scanline {
-                PPU_VBLANK_START_SCANLINE => self.enter_vblank(ppu_bus),
-                PPU_TOTAL_SCANLINES => self.start_new_frame(),
-                _ => {}
+                match self.scanline {
+                    PPU_VBLANK_START_SCANLINE => self.enter_vblank(),
+                    PPU_TOTAL_SCANLINES => self.start_new_frame(),
+                    _ => {}
+                }
             }
         }
     }
+    
     
     fn render_pixel(&mut self, ppu_bus: &mut PPUBus) {
         let x = self.cycle as usize;
@@ -191,20 +194,25 @@ impl PPU {
         ppu_bus.memory()[mirrored_address as usize]
     }
 
-    fn enter_vblank(&mut self, ppu_bus: &mut PPUBus) {
-        self.status_register |= STATUS_VBLANK_FLAG; // Set VBlank flag in PPUSTATUS
-    
-        if self.control_register & CONTROL_NMI_ENABLE_FLAG != 0 {
-            self.nmi_triggered = true; // Signal NMI to CPU if enabled
-            ppu_bus.trigger_nmi();
+    fn enter_vblank(&mut self) {
+        self.status_register |= 0x80;
+        
+        if self.control_register & 0x80 != 0 {
+            self.nmi_triggered = true;
         }
     }
+    
 
     fn start_new_frame(&mut self) {
         self.scanline = 0;
         self.frame_count += 1;
-        self.status_register &= !STATUS_VBLANK_FLAG; // Clear VBlank flag
+    
+        // Clear VBlank flag only if it hasn't been cleared by CPU read
+        if self.status_register & STATUS_VBLANK_FLAG != 0 {
+            self.status_register &= !STATUS_VBLANK_FLAG;
+        }
     }
+    
     
     #[cfg(debug_assertions)]
     pub fn print_chr_rom_tiles(&self, ppu_bus: &PPUBus) {

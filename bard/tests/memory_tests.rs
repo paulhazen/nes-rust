@@ -16,8 +16,8 @@ mod tests {
                 mapper_id: 0, // NROM (No mapper)
                 buffer: Box::new([0x00; 16]),
             },
-            prg_rom: prg_rom_data.into_boxed_slice(),
-            chr_rom: vec![].into_boxed_slice(), // Empty CHR-ROM
+            prg_rom: prg_rom_data,
+            chr_rom: vec![], // Empty CHR-ROM
         }
     }
 

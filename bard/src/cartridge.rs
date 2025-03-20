@@ -9,9 +9,9 @@ pub struct Cartridge {
     /// The parsed NES cartridge header containing metadata.
     pub header: CartridgeHeader,
     /// The program (PRG) ROM data, stored in a boxed slice.
-    pub prg_rom: Box<[u8]>,
+    pub prg_rom: Vec<u8>,
     /// The character (CHR) ROM data, stored in a boxed slice.
-    pub chr_rom: Box<[u8]>,
+    pub chr_rom: Vec<u8>,
 }
 
 /// Stores metadata from an NES cartridge header.
@@ -62,8 +62,8 @@ impl Cartridge {
         let header = Self::load_header(&mut reader)?;
 
         // Allocate memory for PRG and CHR ROMs based on header values
-        let mut prg_rom = vec![0u8; (header.prg_rom_size as usize * 16_384).into()].into_boxed_slice();
-        let mut chr_rom = vec![0u8; (header.chr_rom_size as usize * 8_192).into()].into_boxed_slice();
+        let mut prg_rom = vec![0u8; (header.prg_rom_size as usize * 16_384).into()];
+        let mut chr_rom = vec![0u8; (header.chr_rom_size as usize * 8_192).into()];
 
         // Read PRG ROM data
         reader.read_exact(&mut prg_rom)?;
@@ -81,7 +81,7 @@ impl Cartridge {
         })
     }
 
-    pub fn get_chr_rom(&self) -> Box<[u8]> {
+    pub fn get_chr_rom(&self) -> Vec<u8> {
         self.chr_rom.clone()
     }
 

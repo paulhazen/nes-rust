@@ -44,8 +44,6 @@ impl NES {
     pub fn open_rom(rom_filepath: &str) -> Self {
         let cartridge = Cartridge::load_from_file(rom_filepath).unwrap();
 
-        let cpu = CPU::new();
-        
         let ppu = PPU::load_from_cartridge(&cartridge); // Create PPU first
         let ppu_bus = Rc::new(RefCell::new(PPUBus::load_cartridge(cartridge.clone()))); // Create PPU bus
 
@@ -61,14 +59,17 @@ impl NES {
 
         println!("DEBUG: Read VRAM value = {:02X}", read_value);
 
-        Self::dump_nametable(&ppu_bus.borrow_mut());
-
-        //ppu.print_chr_rom_tiles(&ppu_bus.borrow());
+        ppu_bus.borrow().dump_memory();
 
         let mut cpu_bus = CPUBus::load_cartridge(cartridge);
+
+        cpu_bus.dump_memory();
+
         cpu_bus.set_ppu_bus(Rc::clone(&ppu_bus));
 
-        //ppu_bus.borrow_mut().set_nmi_callback(|| cpu_bus.trigger_nmi());
+        let cpu = CPU::new(&mut cpu_bus);
+        
+        cpu.dbg_view_opcode_table();
 
         let viewer = FramebufferViewer::new(&rom_filepath);
 
@@ -80,21 +81,18 @@ impl NES {
             viewer,
         }
     }
-    
+
 
     pub fn run(&mut self) {
 
         // Reset the CPU explicitly before running (TODO: This may not be needed)
         self.cpu.reset(&self.cpu_bus);
 
-        // Dump the nametable after execution
-        Self::dump_nametable(&self.ppu_bus.borrow());
-
-       loop {
-            let _cycles = self.cpu.step(&mut self.cpu_bus);
+        loop {
+            let cycles = self.cpu.step(&mut self.cpu_bus);
 
             for _ in 0..3 {
-                self.ppu.tick(&mut self.ppu_bus.borrow_mut());
+                self.ppu.tick(&mut self.ppu_bus.borrow_mut(), cycles);
             }
 
             self.viewer.update(&self.ppu.frame_buffer);
